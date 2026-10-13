@@ -2,13 +2,18 @@
 //  UserNotifications.swift
 //  Notifiers - Notifications
 //
-//  Copyright © 2024 dataJAR Ltd. All rights reserved.
+//  Copyright © 2020 - 2026 Jamf. All rights reserved.
 //
 
 // Imports
 import UserNotifications
 
-// If we cannot post notifications
+/// Posts an authorisation error and exits when the app is not permitted to post notifications.
+///
+/// - Parameters:
+///   - statusDescription: A human-readable description of the authorisation status.
+///   - verboseMode: A non-empty string enables verbose NSLog output.
+///
 func authorisationNotGranted(statusDescription: String, verboseMode: String) {
     // Post error to NSLog and std out
     postToNSLogAndStdOut(logLevel: "ERROR", logMessage: """
@@ -20,7 +25,15 @@ func authorisationNotGranted(statusDescription: String, verboseMode: String) {
     exit(1)
 }
 
-// Returns the notifications body
+/// Returns the notification body string from the decoded message content.
+///
+/// - Parameters:
+///   - messageContent: The decoded notification content.
+///   - rootElements: Used to check verbose mode.
+///
+/// - Returns:
+///   The `messageBody` string.
+///
 func getNotificationBody(messageContent: MessageContent, rootElements: RootElements) -> String {
     // If verbose mode is enabled
     if rootElements.verboseMode != nil {
@@ -31,7 +44,15 @@ func getNotificationBody(messageContent: MessageContent, rootElements: RootEleme
     return messageContent.messageBody!
 }
 
-// Returns the notifications body's action
+/// Builds and returns the action dictionary for the notification body click action.
+///
+/// - Parameters:
+///   - messageContent: The decoded notification content containing `messageAction`.
+///   - rootElements: Used to check verbose mode.
+///
+/// - Returns:
+///   A dictionary with `taskPath` and `taskArguments` keys for the message action.
+///
 func getNotificationBodyAction(messageContent: MessageContent, rootElements: RootElements) -> [AnyHashable: Any] {
     // Var declaration
     var messageAction = [AnyHashable: Any]()
@@ -51,7 +72,15 @@ func getNotificationBodyAction(messageContent: MessageContent, rootElements: Roo
     return messageAction
 }
 
-// Returns the notifications sound
+/// Returns the `UNNotificationSound` to use, falling back to the default sound if `"default"` is specified.
+///
+/// - Parameters:
+///   - messageContent: The decoded notification content containing `messageSound`.
+///   - rootElements: Used to check verbose mode.
+///
+/// - Returns:
+///   A `UNNotificationSound` instance for the specified sound name.
+///
 func getNotificationSound(messageContent: MessageContent, rootElements: RootElements) -> UNNotificationSound {
     // Var declaration
     var tempSound = UNNotificationSound.default
@@ -69,7 +98,15 @@ func getNotificationSound(messageContent: MessageContent, rootElements: RootElem
     return tempSound
 }
 
-// Returns the notifications subtitle
+/// Returns the notification subtitle string from the decoded message content.
+///
+/// - Parameters:
+///   - messageContent: The decoded notification content containing `messageSubtitle`.
+///   - rootElements: Used to check verbose mode.
+///
+/// - Returns:
+///   The `messageSubtitle` string, or an empty string if not set.
+///
 func getNotificationSubtitle(messageContent: MessageContent, rootElements: RootElements) -> String {
     // If verbose mode is enabled
     if rootElements.verboseMode != nil {
@@ -80,7 +117,15 @@ func getNotificationSubtitle(messageContent: MessageContent, rootElements: RootE
     return messageContent.messageSubtitle ?? ""
 }
 
-// Returns the notifications title
+/// Returns the notification title string from the decoded message content.
+///
+/// - Parameters:
+///   - messageContent: The decoded notification content containing `messageTitle`.
+///   - rootElements: Used to check verbose mode.
+///
+/// - Returns:
+///   The `messageTitle` string, or an empty string if not set.
+///
 func getNotificationTitle(messageContent: MessageContent, rootElements: RootElements) -> String {
     // If verbose mode is enabled
     if rootElements.verboseMode != nil {
@@ -91,7 +136,16 @@ func getNotificationTitle(messageContent: MessageContent, rootElements: RootElem
     return messageContent.messageTitle ?? ""
 }
 
-// Maps a notification action identifier to a userInfo key and a log message
+/// Maps a `UNNotificationResponse` action identifier to a `userInfo` key and a verbose log message.
+///
+/// Handles the default click, dismiss, first button, and second button identifiers.
+///
+/// - Parameters:
+///   - actionIdentifier: The `UNNotificationResponse.actionIdentifier` string.
+///
+/// - Returns:
+///   A tuple of the `userInfo` key and log message, or `(nil, nil)` for unknown identifiers.
+///
 func resolveNotificationAction(for actionIdentifier: String) -> (userInfoKey: String?, logMessage: String?) {
     // Switch on the action identifier to determine which action to perform
     switch actionIdentifier {
@@ -118,7 +172,14 @@ func resolveNotificationAction(for actionIdentifier: String) -> (userInfoKey: St
     }
 }
 
-// Handles when a notification is interacted with
+/// Handles a user interaction with a previously posted notification.
+///
+/// Resolves the action identifier, executes any associated action, removes the delivered notification,
+/// and exits. Called when the app is re-launched via a notification response.
+///
+/// - Parameters:
+///   - response: The `UNNotificationResponse` from the user's interaction.
+///
 func handleNotification(forResponse response: UNNotificationResponse) {
     // Retrieve userInfo from the response object
     let userInfo = response.notification.request.content.userInfo
@@ -156,7 +217,16 @@ func handleNotification(forResponse response: UNNotificationResponse) {
     exit(0)
 }
 
-// Builds an action dictionary from the first element of a TaskObject array
+/// Builds a `userInfo`-compatible action dictionary from the first element of a ``MessageContent/TaskObject`` array.
+///
+/// - Parameters:
+///   - taskObjects: An array of ``MessageContent/TaskObject`` values; only the first element is used.
+///   - verboseLabel: A label string used in verbose log output to identify the action type.
+///   - rootElements: Used to check verbose mode.
+///
+/// - Returns:
+///   A dictionary with `taskPath` and `taskArguments` keys.
+///
 func buildButtonActionDict(taskObjects: [MessageContent.TaskObject],
                            verboseLabel: String, rootElements: RootElements) -> [AnyHashable: Any] {
     // Var declaration
@@ -178,7 +248,17 @@ func buildButtonActionDict(taskObjects: [MessageContent.TaskObject],
     return actionDict
 }
 
-// Handles the second message button, updating the category to include both buttons
+/// Creates the second notification button action and returns an updated category containing both buttons.
+///
+/// - Parameters:
+///   - notificationAction: The first button's `UNNotificationAction`, included in the updated category.
+///   - messageContent: The decoded notification content containing the second button label and optional action.
+///   - rootElements: Used to check verbose mode.
+///
+/// - Returns:
+///   A tuple of the second button's action dictionary (empty if no action set)
+///   and the updated `UNNotificationCategory`.
+///
 func processMessageButton2(notificationAction: UNNotificationAction, messageContent: MessageContent,
                            rootElements: RootElements) ->
         ([AnyHashable: Any], UNNotificationCategory) {
@@ -209,7 +289,20 @@ func processMessageButton2(notificationAction: UNNotificationAction, messageCont
     return ([:], updatedCategory)
 }
 
-// Adds messageButton (always needed), messageButtonAction, messageButton2 and messageButton2Action (when defined)
+/// Builds the `UNNotificationCategory` for the notification, including any defined button actions.
+///
+/// Always returns a category (required by the notification system). Delegates to
+/// ``processMessageButton2(notificationAction:messageContent:rootElements:)`` when a second button is defined.
+///
+/// - Parameters:
+///   - notificationCenter: The `UNUserNotificationCenter` instance, reserved for future use.
+///   - messageContent: The decoded notification content containing button labels and actions.
+///   - rootElements: Used to check verbose mode.
+///
+/// - Returns:
+///   A tuple of the first button action dictionary, second button action dictionary
+///   (empty if not defined), and the `UNNotificationCategory`.
+///
 func processMessageButton(notificationCenter: UNUserNotificationCenter, messageContent: MessageContent,
                           rootElements: RootElements) ->
         ([AnyHashable: Any], [AnyHashable: Any], UNNotificationCategory) {
@@ -261,7 +354,18 @@ func processMessageButton(notificationCenter: UNUserNotificationCenter, messageC
     return ([:], [:], tempCategory)
 }
 
-// Post the notification
+/// Schedules the notification request with Notification Center and confirms delivery.
+///
+/// Uses `passedBase64` as the notification identifier so it can be removed later.
+/// Exits with code `0` on successful delivery, `1` on scheduling error, or `2` if delivered but not shown (DND/Focus).
+///
+/// - Parameters:
+///   - notificationCenter: The `UNUserNotificationCenter` instance to post to.
+///   - notificationContent: The fully populated `UNMutableNotificationContent`.
+///   - messageContent: The decoded notification content, reserved for future use.
+///   - passedBase64: The base64 string used as the notification identifier.
+///   - rootElements: Used to check verbose mode and pass the `verboseMode` string to inner calls.
+///
 func postNotification(notificationCenter: UNUserNotificationCenter, notificationContent: UNMutableNotificationContent,
                       messageContent: MessageContent, passedBase64: String, rootElements: RootElements) {
     // If we're in verbose mode
@@ -321,7 +425,15 @@ func postNotification(notificationCenter: UNUserNotificationCenter, notification
     }
 }
 
-// Process actions when interacted
+/// Executes the action stored in `userInfo` for the given key when a notification is interacted with.
+///
+/// Handles the `logout` task path specially by calling ``gracefulLogout(userInfo:)``,
+/// otherwise runs the task via ``runTask(taskPath:taskArguments:userInfo:)``.
+///
+/// - Parameters:
+///   - userInfoKey: The key into `userInfo` identifying which action to run.
+///   - userInfo: The notification's `userInfo` dictionary containing the action payload and verbose mode flag.
+///
 func processNotificationActions(userInfoKey: String, userInfo: [AnyHashable: Any]) {
     // Var declaration
     var messageActionDict = [String: Any]()
@@ -378,7 +490,14 @@ func processNotificationActions(userInfoKey: String, userInfo: [AnyHashable: Any
     }
 }
 
-// If we're to remove a specific prior posted notification
+/// Removes the specific prior posted notification matching `passedBase64` and exits.
+///
+/// - Parameters:
+///   - notificationCenter: The `UNUserNotificationCenter` instance to use.
+///   - messageContent: The decoded notification content, reserved for future use.
+///   - passedBase64: The base64 identifier of the notification to remove.
+///   - rootElements: Used to check verbose mode.
+///
 func removePriorNotification(notificationCenter: UNUserNotificationCenter, messageContent: MessageContent,
                              passedBase64: String, rootElements: RootElements) {
     // If we're in verbose mode
@@ -398,7 +517,13 @@ func removePriorNotification(notificationCenter: UNUserNotificationCenter, messa
     exit(0)
 }
 
-// If we're to remove all prior posted notifications
+/// Removes all prior delivered notifications and exits.
+///
+/// - Parameters:
+///   - notificationCenter: The `UNUserNotificationCenter` instance to use.
+///   - messageContent: The decoded notification content, reserved for future use.
+///   - rootElements: Used to check verbose mode.
+///
 func removeAllPriorNotifications(notificationCenter: UNUserNotificationCenter, messageContent: MessageContent,
                                  rootElements: RootElements) {
     // If we're in verbose mode
@@ -418,7 +543,14 @@ func removeAllPriorNotifications(notificationCenter: UNUserNotificationCenter, m
     exit(0)
 }
 
-// Check authorisation status, exit if not granted
+/// Requests notification authorisation from the system, exiting if it is denied or not granted.
+///
+/// Calls ``authorisationNotGranted(statusDescription:verboseMode:)`` with a descriptive status string
+/// if authorisation is not granted or an error occurs.
+///
+/// - Parameters:
+///   - verboseMode: A non-empty string enables verbose NSLog output.
+///
 func requestAuthorisation(verboseMode: String) async {
     // Attempt to request authorisation, catching any system-level errors
     do {

@@ -2,13 +2,20 @@
 //  UserNotifications.swift
 //  Notifiers - Alerts
 //
-//  Copyright © 2024 dataJAR Ltd. All rights reserved.
+//  Copyright © 2020 - 2026 Jamf. All rights reserved.
 //
 
 // Imports
 import UserNotifications
 
-// Sets the notifications body to what was passed to --message
+/// Returns the notification body string from the value passed to `--message`.
+///
+/// - Parameters:
+///   - parsedResult: The parsed CLI arguments.
+///
+/// - Returns:
+///   The string passed to `--message`.
+///
 func setNotificationBody(parsedResult: ArgParser) -> String {
     // If verbose mode is enabled
     if parsedResult.verbose {
@@ -19,7 +26,14 @@ func setNotificationBody(parsedResult: ArgParser) -> String {
     return parsedResult.message
 }
 
-// Sets the notifications message button to what was passed to --messagebutton
+/// Returns the notification message button label from the value passed to `--messagebutton`.
+///
+/// - Parameters:
+///   - parsedResult: The parsed CLI arguments.
+///
+/// - Returns:
+///   The string passed to `--messagebutton`.
+///
 func setNotificationMessageButton(parsedResult: ArgParser) -> String {
     // If verbose mode is enabled
     if parsedResult.verbose {
@@ -30,7 +44,14 @@ func setNotificationMessageButton(parsedResult: ArgParser) -> String {
     return parsedResult.messagebutton
 }
 
-// Sets the notifications second message button to what was passed to --messagebutton2
+/// Returns the notification second message button label from the value passed to `--messagebutton2`.
+///
+/// - Parameters:
+///   - parsedResult: The parsed CLI arguments.
+///
+/// - Returns:
+///   The string passed to `--messagebutton2`.
+///
 func setNotificationMessageButton2(parsedResult: ArgParser) -> String {
     // If verbose mode is enabled
     if parsedResult.verbose {
@@ -41,7 +62,14 @@ func setNotificationMessageButton2(parsedResult: ArgParser) -> String {
     return parsedResult.messagebutton2
 }
 
-// Sets the notifications sound to what was passed to --sound
+/// Returns the notification sound name from the value passed to `--sound`.
+///
+/// - Parameters:
+///   - parsedResult: The parsed CLI arguments.
+///
+/// - Returns:
+///   The string passed to `--sound`.
+///
 func setNotificationSound(parsedResult: ArgParser) -> String {
     // If verbose mode is enabled
     if parsedResult.verbose {
@@ -52,7 +80,14 @@ func setNotificationSound(parsedResult: ArgParser) -> String {
     return parsedResult.sound
 }
 
-// Sets the notifications subtitle to what was passed to --subtitle
+/// Returns the notification subtitle from the value passed to `--subtitle`.
+///
+/// - Parameters:
+///   - parsedResult: The parsed CLI arguments.
+///
+/// - Returns:
+///   The string passed to `--subtitle`.
+///
 func setNotificationSubtitle(parsedResult: ArgParser) -> String {
     // If verbose mode is enabled
     if parsedResult.verbose {
@@ -63,7 +98,14 @@ func setNotificationSubtitle(parsedResult: ArgParser) -> String {
     return parsedResult.subtitle
 }
 
-// Sets the notifications title to what was passed to --title
+/// Returns the notification title from the value passed to `--title`.
+///
+/// - Parameters:
+///   - parsedResult: The parsed CLI arguments.
+///
+/// - Returns:
+///   The string passed to `--title`.
+///
 func setNotificationTitle(parsedResult: ArgParser) -> String {
     // If verbose mode is enabled
     if parsedResult.verbose {

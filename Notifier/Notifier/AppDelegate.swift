@@ -2,7 +2,7 @@
 //  AppDelegate.swift
 //  Notifier
 //
-//  Copyright © 2024 dataJAR Ltd. All rights reserved.
+//  Copyright © 2020 - 2026 Jamf. All rights reserved.
 //
 
 // Imports
@@ -16,7 +16,13 @@ import UserNotifications
 class AppDelegate: NSObject, NSApplicationDelegate {
     // IBOutlet declaration
     @IBOutlet weak var window: NSWindow!
-    // If we're about to load, make sure we're logged in, exit otherwise
+    /// Validates the logged-in user and handles early rebrand before the app fully loads.
+    ///
+    /// Exits early if no user is logged in and we are not rebranding.
+    ///
+    /// - Parameters:
+    ///   - aNotification: The notification posted by the system before launch completes.
+    ///
     func applicationWillFinishLaunching(_ aNotification: Notification) {
         // Get the username of the logged in user
         let loggedInUser = loggedInUser()
@@ -36,7 +42,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             exit(0)
         }
     }
-    // Check arguments passed to app, then OS if a valid argument is passed else print usage
+    /// Checks arguments passed to the app and dispatches to the appropriate notification flow.
+    ///
+    /// Handles rebrand, checks for a logged-in user, validates `--type`, confirms Notification Center
+    /// is running, then either removes notifications or calls ``formatArgs(loggedInUser:notifierPath:parsedResult:)``.
+    ///
+    /// - Parameters:
+    ///   - aNotification: The notification posted by the system once launch completes.
+    ///
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // The first argument is always the executable, drop it
         let passedArgs = Array(CommandLine.arguments.dropFirst())
@@ -111,7 +124,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
-// Check that we have all the needed arguments and that they are valid options, exiting if not
+/// Validates that all required CLI arguments are present and hold valid values.
+///
+/// Exits with an error and prints `--help` if `--type`, `--remove`, or `--message` are invalid or missing.
+///
+/// - Parameters:
+///   - parsedResult: The parsed CLI arguments.
+///
 func checkArgs(parsedResult: ArgParser) {
     // If an invalid value for --type has been passed
     if parsedResult.type.lowercased() != "alert" && parsedResult.type.lowercased() != "banner" {
@@ -147,7 +166,16 @@ func checkArgs(parsedResult: ArgParser) {
     }
 }
 
-// Builds a RootElements object from the parsed arguments
+/// Builds a ``RootElements`` object from the parsed CLI arguments.
+///
+/// Sets `verboseMode` and `removeOption` when the corresponding flags are present.
+///
+/// - Parameters:
+///   - parsedResult: The parsed CLI arguments.
+///
+/// - Returns:
+///   A populated ``RootElements`` instance.
+///
 func buildRootElements(parsedResult: ArgParser) -> RootElements {
     // Initialize a rootElements object
     var rootElements = RootElements()
@@ -170,7 +198,15 @@ func buildRootElements(parsedResult: ArgParser) -> RootElements {
     return rootElements
 }
 
-// Applies message button fields to the given MessageContent object
+/// Applies message button fields from the parsed CLI arguments to a ``MessageContent`` object.
+///
+/// Sets `messageButton`, `messageButtonAction`, `messageButton2`, and `messageButton2Action`
+/// when the corresponding options are present. The second button is only set if the first is also present.
+///
+/// - Parameters:
+///   - parsedResult: The parsed CLI arguments.
+///   - messageContent: The ``MessageContent`` object to mutate with button fields.
+///
 func applyMessageButtons(parsedResult: ArgParser, to messageContent: inout MessageContent) {
     // If we've been passed a messagebutton
     if parsedResult.messagebutton != "" {
@@ -198,7 +234,16 @@ func applyMessageButtons(parsedResult: ArgParser, to messageContent: inout Messa
     }
 }
 
-// Builds a MessageContent object from the parsed arguments
+/// Builds a ``MessageContent`` object from the parsed CLI arguments.
+///
+/// Populates message body, action, dismiss action, sound, subtitle, title, and button fields.
+///
+/// - Parameters:
+///   - parsedResult: The parsed CLI arguments.
+///
+/// - Returns:
+///   A populated ``MessageContent`` instance.
+///
 func buildMessageContent(parsedResult: ArgParser) -> MessageContent {
     // Initialize a messageContent object
     var messageContent = MessageContent()
@@ -237,7 +282,17 @@ func buildMessageContent(parsedResult: ArgParser) -> MessageContent {
     return messageContent
 }
 
-// Format the args as needed
+/// Formats the CLI arguments into JSON and passes it to the appropriate notifying helper app.
+///
+/// Orchestrates ``buildRootElements(parsedResult:)``, ``buildMessageContent(parsedResult:)``,
+/// ``createJSON(messageContent:parsedResult:rootElements:)``, and
+/// ``passToApp(commandJSON:loggedInUser:notifierPath:parsedResult:)``.
+///
+/// - Parameters:
+///   - loggedInUser: The username of the currently logged-in user.
+///   - notifierPath: The path to the notifying helper app binary.
+///   - parsedResult: The parsed CLI arguments.
+///
 func formatArgs(loggedInUser: String, notifierPath: String, parsedResult: ArgParser) {
     // Build rootElements from the parsed arguments
     let rootElements = buildRootElements(parsedResult: parsedResult)

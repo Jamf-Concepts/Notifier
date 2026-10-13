@@ -2,7 +2,7 @@
 //  AppDelegate.swift
 //  Notifier - Notifications
 //
-//  Copyright © 2024 dataJAR Ltd. All rights reserved.
+//  Copyright © 2020 - 2026 Jamf. All rights reserved.
 //
 
 // Imports
@@ -15,7 +15,14 @@ import UserNotifications
 class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
     // IBOutlet declaration
     @IBOutlet weak var window: NSWindow!
-    // When we've finished launching
+    /// Handles launch, processing any pending notification response or dispatching CLI argument handling.
+    ///
+    /// If launched via a notification interaction, delegates to ``handleNotification(forResponse:)``.
+    /// Otherwise decodes the CLI JSON payload and processes the notification request.
+    ///
+    /// - Parameters:
+    ///   - aNotification: The notification posted by the system once launch completes.
+    ///
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // If .userInfo is populated, we've been launched by interaction with a prior posted notification
         if let response = (aNotification as NSNotification).userInfo?[
@@ -73,7 +80,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     }
 }
 
-// Process the arguments as needed
+/// Processes the decoded notification arguments and either removes or posts a notification.
+///
+/// Handles `removeOption` for both "all" and "prior" cases, or builds and posts a new banner notification
+/// with any applicable action, button, sound, subtitle, and title content.
+///
+/// - Parameters:
+///   - messageContent: The decoded notification content.
+///   - notificationCenter: The `UNUserNotificationCenter` instance to use.
+///   - passedBase64: The base64 identifier used to reference this notification.
+///   - rootElements: The decoded root-level notification metadata.
+///
 func processArguments(messageContent: MessageContent, notificationCenter: UNUserNotificationCenter,
                       passedBase64: String, rootElements: RootElements) {
     // Create a notification content object

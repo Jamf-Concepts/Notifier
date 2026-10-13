@@ -2,14 +2,23 @@
 //  Functions.swift
 //  Notifier
 //
-//  Copyright © 2024 dataJAR Ltd. All rights reserved.
+//  Copyright © 2020 - 2026 Jamf. All rights reserved.
 //
 
 // Imports
 import Cocoa
 import SystemConfiguration
 
-// Changes the .app's icons restarting Notification Center if rebranding was successful
+/// Updates the icons of all Notifier app bundles and restarts Notification Center if a user is logged in.
+///
+/// Requires root privileges. Calls ``updateIcon(brandingImage:imageData:objectPath:parsedResult:)``
+/// for each bundle and ``registerApplications(parsedResult:)`` to re-register with Notification Center.
+///
+/// - Parameters:
+///   - brandingImage: Path to the image file to use as the new icon.
+///   - loggedInUser: The username of the currently logged-in user.
+///   - parsedResult: The parsed CLI arguments.
+///
 func changeIcons(brandingImage: String, loggedInUser: String, parsedResult: ArgParser) {
     // Confirm we're root before proceeding
     rootCheck(parsedResult: parsedResult, passedArg: "--rebrand")
@@ -47,7 +56,19 @@ func changeIcons(brandingImage: String, loggedInUser: String, parsedResult: ArgP
     exit(0)
 }
 
-// Create JSON from passed string
+/// Encodes ``MessageContent`` and ``RootElements`` into a base64-encoded JSON string.
+///
+/// The message content is first encoded to JSON and base64-encoded into `rootElements.messageContent`,
+/// then the full ``RootElements`` is encoded to JSON and base64-encoded for passing to the helper app.
+///
+/// - Parameters:
+///   - messageContent: The notification content to encode.
+///   - parsedResult: The parsed CLI arguments, used for verbose logging.
+///   - rootElements: The root-level notification metadata to encode.
+///
+/// - Returns:
+///   A base64-encoded JSON string representing the full payload.
+///
 func createJSON(messageContent: MessageContent, parsedResult: ArgParser, rootElements: RootElements) -> String {
     // Var declaration
     var contentJSON = Data()
@@ -105,7 +126,17 @@ func createJSON(messageContent: MessageContent, parsedResult: ArgParser, rootEle
     return fullJSON.base64EncodedString()
 }
 
-// Gets the modification date and time of the file and return as epoch
+/// Loads and validates the image at the given path for use as a branding icon.
+///
+/// Exits with an error if the file does not exist or is not a valid image.
+///
+/// - Parameters:
+///   - brandingImage: The path to the image file.
+///   - parsedResult: The parsed CLI arguments, used for verbose logging.
+///
+/// - Returns:
+///   An `NSImage` loaded from the given path, or exits on failure.
+///
 func getImageDetails(brandingImage: String, parsedResult: ArgParser) -> (NSImage?) {
     // Var declaration
     var imageData: NSImage?
@@ -133,7 +164,11 @@ func getImageDetails(brandingImage: String, parsedResult: ArgParser) -> (NSImage
     }
 }
 
-// Checks that notification center is running, and exit if it's not
+/// Checks that Notification Center is running for the current user, exiting if it is not.
+///
+/// - Parameters:
+///   - parsedResult: The parsed CLI arguments, used for verbose logging.
+///
 func isNotificationCenterRunning(parsedResult: ArgParser) {
     // Exit if Notification Center isn't running for the user
     guard !NSRunningApplication.runningApplications(withBundleIdentifier:
@@ -151,7 +186,11 @@ func isNotificationCenterRunning(parsedResult: ArgParser) {
     }
 }
 
-// Returns username if a user is logged in, and "" if at the loginwindow
+/// Returns the username of the currently logged-in console user.
+///
+/// - Returns:
+///   The username string, or an empty string if at the login window or no user is logged in.
+///
 func loggedInUser() -> String {
     // Get the name of the logged in user
     let loggedInUser = SCDynamicStoreCopyConsoleUser(nil, nil, nil)! as String
@@ -165,7 +204,18 @@ func loggedInUser() -> String {
     }
 }
 
-// Parses the action text, splitting it into argv compliant format
+/// Parses an action string into an argv-compatible ``MessageContent/TaskObject`` array.
+///
+/// Handles quoted arguments with spaces, single-item paths (opened via `/usr/bin/open`),
+/// the special `logout` keyword, and multi-argument commands where the first element is a binary path.
+///
+/// - Parameters:
+///   - actionString: The raw action string passed via a CLI action option.
+///   - parsedResult: The parsed CLI arguments, used for verbose logging.
+///
+/// - Returns:
+///   An array containing a single ``MessageContent/TaskObject`` with `taskPath` and `taskArguments` set.
+///
 func parseAction(actionString: String, parsedResult: ArgParser) -> [MessageContent.TaskObject] {
     // Var declaration
     var regexDict = [String: String]()
@@ -252,7 +302,17 @@ func parseAction(actionString: String, parsedResult: ArgParser) -> [MessageConte
     return [MessageContent.TaskObject(taskPath: taskPath, taskArguments: taskArguments)]
 }
 
-// Passes messageContentJSON to the relevant app, exiting afterwards
+/// Launches the notifying helper app with the encoded command JSON, running as the logged-in user if needed.
+///
+/// Uses `/usr/bin/su` when the current process runs as a different user (e.g. root).
+/// Exits with the helper app's exit code unless rebranding.
+///
+/// - Parameters:
+///   - commandJSON: The base64-encoded JSON payload to pass to the helper app.
+///   - loggedInUser: The username of the currently logged-in user.
+///   - notifierPath: The path to the notifying helper app binary.
+///   - parsedResult: The parsed CLI arguments, used for verbose logging.
+///
 func passToApp(commandJSON: String, loggedInUser: String, notifierPath: String, parsedResult: ArgParser) {
     // Var declaration
     var taskArguments = [String]()
@@ -293,7 +353,14 @@ func passToApp(commandJSON: String, loggedInUser: String, notifierPath: String, 
     }
 }
 
-// Post to both NSLog and stdout
+/// Posts a log message to NSLog (when verbose) or stdout (when not verbose).
+///
+/// - Parameters:
+///   - logLevel: The severity level string (e.g. `"INFO"`, `"WARNING"`, `"ERROR"`).
+///   - logMessage: The message to log.
+///   - functionName: The name of the calling function, included in verbose output.
+///   - parsedResult: The parsed CLI arguments, used to determine verbose mode.
+///
 func postToNSLogAndStdOut(logLevel: String, logMessage: String, functionName: String, parsedResult: ArgParser) {
     // If verbose mode is enabled...
     if parsedResult.verbose {
@@ -306,7 +373,13 @@ func postToNSLogAndStdOut(logLevel: String, logMessage: String, functionName: St
     }
 }
 
-// Registers the notifying applications in Notificaton Center
+/// Registers both notifying helper apps with Notification Center by sending and removing a dummy notification.
+///
+/// Also restarts Notification Center for the logged-in user if one is present.
+///
+/// - Parameters:
+///   - parsedResult: The parsed CLI arguments, used for verbose logging.
+///
 func registerApplications(parsedResult: ArgParser) {
     // Var declaration
     var taskArguments = [String]()
@@ -369,7 +442,12 @@ func registerApplications(parsedResult: ArgParser) {
     }
 }
 
-// Make sure we're running as root, exit if not
+/// Verifies that the current process is running as root, exiting with an error if not.
+///
+/// - Parameters:
+///   - parsedResult: The parsed CLI arguments, used for verbose logging.
+///   - passedArg: The CLI argument that requires root, included in the error message.
+///
 func rootCheck(parsedResult: ArgParser, passedArg: String) {
     // If we're not root...
     if NSUserName() != "root" {
@@ -382,7 +460,16 @@ func rootCheck(parsedResult: ArgParser, passedArg: String) {
     }
 }
 
-// Runs the passed task
+/// Runs a subprocess at the given path with the given arguments and waits for it to exit.
+///
+/// - Parameters:
+///   - parsedResult: The parsed CLI arguments, used for verbose logging.
+///   - taskArguments: The arguments to pass to the executable.
+///   - taskPath: The path to the executable.
+///
+/// - Returns:
+///   The process termination status code.
+///
 @discardableResult
 func runTask(parsedResult: ArgParser, taskArguments: [String], taskPath: String) -> Int32 {
     // If verbose mode is enabled...
@@ -404,7 +491,17 @@ func runTask(parsedResult: ArgParser, taskArguments: [String], taskPath: String)
     return task.terminationStatus
 }
 
-// Attempts to update the app passed to objectPath's icon
+/// Attempts to replace the icon of the app bundle at the given path with the provided image.
+///
+/// First clears the existing icon to ensure macOS detects the change, then applies the new image.
+/// Exits with an error if the icon update fails.
+///
+/// - Parameters:
+///   - brandingImage: The path to the source image, included in log messages.
+///   - imageData: The `NSImage` to apply as the new icon.
+///   - objectPath: The path to the app bundle to rebrand.
+///   - parsedResult: The parsed CLI arguments, used for verbose logging.
+///
 func updateIcon(brandingImage: String, imageData: NSImage, objectPath: String, parsedResult: ArgParser) {
     // Revert the icon, always returns false and this helps the OS realise that ther has been an icon change
     NSWorkspace.shared.setIcon(nil, forFile: objectPath, options: NSWorkspace.IconCreationOptions([]))

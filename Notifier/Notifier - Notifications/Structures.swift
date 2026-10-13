@@ -2,7 +2,7 @@
 //  Structures.swift
 //  Notifier - Notifications
 //
-//  Copyright © 2024 dataJAR Ltd. All rights reserved.
+//  Copyright © 2020 - 2026 Jamf. All rights reserved.
 //
 
 // Structure of MessageContent
