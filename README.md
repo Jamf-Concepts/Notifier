@@ -10,7 +10,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 # Notifier
 <p align="center"><img width="256" alt="Alert" src="https://github.com/Jamf-Concepts/Notifier/assets/2464974/d8d2cca1-250c-4601-a1d5-1fea2330ba14">
 
-Notifier is a Swift app which can post alert or banner notifications on macOS 10.15+ clients.
+Notifier is a Swift app which can post alert or banner notifications on macOS 12.0+ clients.
 
 Notifications are delivered via the [UserNotifications Framework](https://developer.apple.com/documentation/usernotifications)
 
