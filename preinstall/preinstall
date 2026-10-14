@@ -1,0 +1,30 @@
+#!/bin/bash
+#
+##########################################################################################
+#
+# In accessing and using this Product, you confirm that you accept the terms of our
+# Product Licence in full and agree to comply with the terms of such Licence.
+#
+# https://resources.jamf.com/documents/products/documentation/software-license-and-services-agreement.pdf
+#
+##########################################################################################
+#
+# DESCRIPTION
+# Postinstall script for Jamf Notifier
+#
+##########################################################################################
+
+# Check to see if Notifier is installed...
+if [ -d '/Applications/Utilities/Notifier.app' ]
+then
+    # Get the bundle id....
+    bundleId=$(/usr/bin/defaults read /Applications/Utilities/Notifier.app/Contents/info.plist CFBundleIdentifier || true)
+    # If `bundleId` isn't `com.jamf.notifier`...
+    if [ "${bundleId}" != "com.jamf.notifier" ]
+    then
+        # Delete Notifier.app
+        /bin/rm -rf /Applications/Utilities/Notifier.app
+        # Log.
+        /bin/echo "Deleted: /Applications/Utilities/Notifier.app..."
+    fi
+fi
