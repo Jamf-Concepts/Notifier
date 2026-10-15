@@ -13,7 +13,7 @@
 					<key>BadgesEnabled</key>
 					<true/>
 					<key>BundleIdentifier</key>
-					<string>com.jamf.NotifierNotifications</string>
+					<string>com.jamf.notifier.notifications</string>
 					<key>CriticalAlertEnabled</key>
 					<false/>
 					<key>NotificationsEnabled</key>
@@ -31,7 +31,7 @@
 					<key>BadgesEnabled</key>
 					<true/>
 					<key>BundleIdentifier</key>
-					<string>com.jamf.NotifierAlerts</string>
+					<string>com.jamf.notifier.alerts</string>
 					<key>CriticalAlertEnabled</key>
 					<false/>
 					<key>NotificationsEnabled</key>
@@ -61,7 +61,7 @@
 	<key>PayloadIdentifier</key>
 	<string>C4B6FAAA-D592-4FA2-BF68-F8994C05FF0D</string>
 	<key>PayloadOrganization</key>
-	<string>Jamf Software, LLC</string>
+	<string>Jamf</string>
 	<key>PayloadScope</key>
 	<string>System</string>
 	<key>PayloadType</key>
