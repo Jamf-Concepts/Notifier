@@ -36,7 +36,7 @@ NOTIFICATION ACTIONS:
         		 • --messageaction        - Fires when the notification body itself is clicked.
         		 • --messagebuttonaction  - Requires --messagebutton. Fires when --messagebutton is clicked.
         		 • --messagebutton2action - Requires --messagebutton2. Fires when --messagebutton2 is clicked.
-        		 • --messagedismissaction - Fires when the user clicks the X to explicitly dismiss the notification.
+        		 • --messagedismissaction - Fires when the user clicks the (X) to explicitly dismiss the notification.
 
         		 The following values can be passed to any action option:
 
