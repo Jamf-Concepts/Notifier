@@ -63,35 +63,10 @@ struct RootElements: Codable {
     var removeOption: String?
     // Optional - enables verbose logging.
     var verboseMode: String?
-    // Initialize MessageContent.
+    // Initialize RootElements.
     init(messageContent: String? = nil, removeOption: String? = nil, verboseMode: String? = nil) {
         self.messageContent = messageContent
         self.removeOption = removeOption
         self.verboseMode = verboseMode
-    }
-}
-
-// For storing data in the notifications userInfo.
-struct UserInfo: Codable {
-    // Optional - action to perform when the message is clicked.
-    var messageAction: [TaskObject]?
-    // Optional - action to perform when the message button is clicked.
-    var messageButtonAction: [TaskObject]?
-    // Optional - action to perform when the second message button is clicked.
-    var messageButton2Action: [TaskObject]?
-    // Arguments for the task object.
-    struct TaskObject: Codable {
-        // The tasks executable.
-        var taskPath: String?
-        // Arguments to pass to the task executable.
-        var taskArguments: [String]?
-    }
-    // Initialize ParsedArguments.
-    init(messageAction: [TaskObject]? = nil, messageButtonAction: [TaskObject]? = nil,
-         messageButton2Action: [TaskObject]? = nil) {
-        self.messageAction = messageAction
-        self.messageButtonAction = messageButtonAction
-        // Assign the second message button action.
-        self.messageButton2Action = messageButton2Action
     }
 }
