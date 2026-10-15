@@ -76,7 +76,7 @@ struct RootElements: Codable {
     var removeOption: String?
     // Optional - enables verbose logging.
     var verboseMode: String?
-    // Initialize MessageContent.
+    // Initialize RootElements.
     init(messageContent: String? = nil, removeOption: String? = nil, verboseMode: String? = nil) {
         self.messageContent = messageContent
         self.removeOption = removeOption
