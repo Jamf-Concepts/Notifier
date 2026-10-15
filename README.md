@@ -1,6 +1,6 @@
 <details>
 <summary>Licensed under the Apache License, Version 2.0 </summary>
-Copyright 2026 Jamf LTD
+Copyright 2026 Jamf.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -17,80 +17,85 @@ Notifications are delivered via the [UserNotifications Framework](https://develo
 # Usage
 ## Basic Usage
 ```
-OVERVIEW: Notifier 3.1: Posts alert or banner notifications.
+OVERVIEW: Notifier 4.0: Posts alert or banner style notifications to the logged-in user.
 
-USAGE: --type <alert/banner> --message <some message> <options>
-       --type <alert/banner> --remove prior <some message> <options>
-       --type <alert/banner> --remove all
+USAGE: --type <alert|banner> --message <message> [options]
+       --type <alert|banner> --message <message> --messageaction <action>
+       --type <alert|banner> --message <message> --messagebutton <label> --messagebuttonaction <action>
+       --type <alert|banner> --message <message> --messagebutton <label> --messagebutton2 <label> --messagebutton2action <action>
+       --type <alert|banner> --message <message> --messagedismissaction <action>
+       --type <alert|banner> --remove prior --message <message> [options]
+       --type <alert|banner> --remove all
        --rebrand <path to image>
 
-OPTIONS:
-  --type <type>           alert or banner - REQUIRED.
-
-  --message <message>     The notifications message.
-
+NOTIFICATION ACTIONS:
   --messageaction <messageaction>
-                          The action to be performed under the users account
-                          when the message is clicked.
+                          The action to perform when the notification body is clicked.
+        		 Each action option applies to a different interaction point on the notification:
 
-                          • Passing 'logout' will prompt the user to logout.
-                          • If passed a single item, this will be launched via:
-                          /usr/bin/open
-                          • More complex commands can be passed, but the 1st
-                          argument needs to be a binaries path.
+        		 • --messageaction        - Fires when the notification body itself is clicked.
+        		 • --messagebuttonaction  - Requires --messagebutton. Fires when --messagebutton is clicked.
+        		 • --messagebutton2action - Requires --messagebutton2. Fires when --messagebutton2 is clicked.
+        		 • --messagedismissaction - Fires when the user clicks the X to explicitly dismiss the notification.
 
-                          For example: "/usr/bin/open" will work, "open" will
-                          not.
+        		 The following values can be passed to any action option:
 
-  --messagebutton <messagebutton>
-                          Adds a button to the message, with the label being
-                          what is passed.
+        		 • 'logout'              - Prompts the logged-in user to log out.
+        		 • A single path or URL  - Opened via /usr/bin/open (e.g. https://example.com).
+        		 • A binary path + args  - The first argument must be a full path to a binary.
+
+        		 For example: "/usr/bin/open" will work, "open" will not.
 
   --messagebuttonaction <messagebuttonaction>
-                          The action to be performed under the users account
-                          when the optional message button is clicked.
+                          The action to perform when --messagebutton is clicked. Requires --messagebutton to be passed. See --messageaction for format details.
 
-                          • Passing 'logout' will prompt the user to logout.
-                          • If passed a single item, this will be launched via:
-                          /usr/bin/open
-                          • More complex commands can be passed, but the 1st
-                          argument needs to be a binaries path.
+  --messagebutton2action <messagebutton2action>
+                          The action to perform when --messagebutton2 is clicked. Requires --messagebutton2 to be passed. See --messageaction for format details.
 
-                          For example: "/usr/bin/open" will work, "open" will
-                          not.
+  --messagedismissaction <messagedismissaction>
+                          The action to perform when the user clicks the X button to explicitly dismiss the notification. See --messageaction for format details.
 
-  --rebrand <rebrand>     Requires root privileges and that the calling process
-                          needs either Full Disk Access (10.15+) or at a
-                          minimum App Management (macOS 13+) permissions, as
-                          well as the notifying applications being given
-                          permission to post to Notification Center. Any of
-                          these permissions can be granted manually, but
-                          ideally via PPPCP's delivered via an MDM.
 
-                          If successful and someone is logged in, Notification
-                          Center is restarted.
+OPTIONS:
+  --type <type>           The notification style to post. Must be either:
 
-  --remove <remove>       "prior" or "all". If passing "prior", the full
-                          message will be required too. Including all passed
-                          flags.
+                          • alert  - Persistent notification that remains until the user dismisses or interacts with it.
+                          • banner - Temporary notification that auto-dismisses after a short time.
 
-  --sound <sound>         The sound to play when notification is delivered.
-                          Pass "default" for the default macOS sound, else the
-                          name of a sound in /Library/Sounds or
-                          /System/Library/Sounds.
+                          The user's Notification Center settings for this application may override the requested style.
 
-                          If the sound cannot be found, macOS will use the
-                          "default" sound.
+  --message <message>     The main body text of the notification.
 
-  --subtitle <subtitle>   The notifications subtitle.
+  --messagebutton <messagebutton>
+                          Adds an action button to the notification with the given label. Pass --messagebuttonaction to run a command when the button is clicked.
 
-  --title <title>         The notifications title.
+  --messagebutton2 <messagebutton2>
+                          Adds a second action button to the notification with the given label. Requires --messagebutton to also be passed. Pass --messagebutton2action to run a command when this button is clicked.
 
-  --verbose               Enables logging of actions. Check console for
-                          'Notifier' messages.
+  --rebrand <rebrand>     Path to a PNG or ICNS image to use as the notification icon, replacing the default app icon.
+
+                          Requires root privileges. The calling process must have either Full Disk Access (macOS 10.15+) or App Management (macOS 13+) permission, and the notifying applications must be permitted to post to Notification
+                          Center. These permissions can be granted manually or via PPPC profiles delivered by an MDM.
+
+                          If successful and a user is logged in, Notification Center is restarted to apply the change.
+
+  --remove <remove>       Removes previously delivered notifications. Pass either:
+
+                          • prior - Removes the notification matching the current --type, --message, and any other passed flags. All flags used when originally posting the notification must be passed again.
+                          • all   - Removes all notifications delivered by this application.
+
+  --sound <sound>         The sound to play when the notification is delivered. Pass "default" for the standard macOS notification sound, or the name of a sound file in /Library/Sounds or /System/Library/Sounds (without the file
+                          extension).
+
+                          If the named sound cannot be found, macOS will fall back to the default sound.
+
+  --subtitle <subtitle>   Secondary line of text displayed below the title in the notification.
+
+  --title <title>         The bold title line displayed at the top of the notification. Defaults to the application name if not passed.
+
+  --verbose               Enables detailed progress logging via NSLog. View output in Console.app by filtering for 'Notifier'.
 
   --help                  Show help information.
-
 ```
 
 ## Examples
