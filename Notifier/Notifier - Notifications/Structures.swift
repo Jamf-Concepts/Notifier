@@ -1,40 +1,40 @@
 //
-//  Structures.swift
-//  Notifier - Notifications
+//  Structures.swift.
+//  Notifier - Notifications.
 //
 //  Copyright © 2020 - 2026 Jamf. All rights reserved.
 //
 
-// Structure of MessageContent
+// Structure of MessageContent.
 struct MessageContent: Codable {
-    // Optional - action to perform when the message is clicked
+    // Optional - action to perform when the message is clicked.
     var messageAction: [TaskObject]?
-    // The notifications message (required)
+    // The notifications message (required).
     var messageBody: String?
-    // Optional - message button label
+    // Optional - message button label.
     var messageButton: String?
-    // Optional - action to perform when the message button is clicked
+    // Optional - action to perform when the message button is clicked.
     var messageButtonAction: [TaskObject]?
-    // Optional - second message button label (requires messageButton to also be set)
+    // Optional - second message button label (requires messageButton to also be set).
     var messageButton2: String?
-    // Optional - action to perform when the second message button is clicked
+    // Optional - action to perform when the second message button is clicked.
     var messageButton2Action: [TaskObject]?
-    // Optional - action to perform when the notification is dismissed
+    // Optional - action to perform when the notification is dismissed.
     var messageDismissAction: [TaskObject]?
-    // Optional - the sound played when the notification has been delivered
+    // Optional - the sound played when the notification has been delivered.
     var messageSound: String?
-    // Optional - the notifications subtitle
+    // Optional - the notifications subtitle.
     var messageSubtitle: String?
-    // Optional - the notifications title
+    // Optional - the notifications title.
     var messageTitle: String?
-    // Arguments for the task object
+    // Arguments for the task object.
     struct TaskObject: Codable {
-        // The tasks executable
+        // The tasks executable.
         var taskPath: String?
-        // Arguments to pass to the task executable
+        // Arguments to pass to the task executable.
         var taskArguments: [String]?
     }
-    // Initialize MessageContent
+    // Initialize MessageContent.
     init(messageAction: [TaskObject]? = nil, messageBody: String? = nil, messageButton: String? = nil,
          messageButton2: String? = nil, messageButton2Action: [TaskObject]? = nil,
          messageButtonAction: [TaskObject]? = nil, messageDismissAction: [TaskObject]? = nil,
@@ -42,12 +42,12 @@ struct MessageContent: Codable {
         self.messageAction = messageAction
         self.messageBody = messageBody
         self.messageButton = messageButton
-        // Assign the second message button label
+        // Assign the second message button label.
         self.messageButton2 = messageButton2
-        // Assign the second message button action
+        // Assign the second message button action.
         self.messageButton2Action = messageButton2Action
         self.messageButtonAction = messageButtonAction
-        // Assign the dismiss action
+        // Assign the dismiss action.
         self.messageDismissAction = messageDismissAction
         self.messageSound = messageSound
         self.messageSubtitle = messageSubtitle
@@ -55,15 +55,15 @@ struct MessageContent: Codable {
     }
 }
 
-// Structure of RootElements
+// Structure of RootElements.
 struct RootElements: Codable {
-    // Optional - the messages content
+    // Optional - the messages content.
     var messageContent: String?
-    // Optional - removes a specific notification or all notifications delivered
+    // Optional - removes a specific notification or all notifications delivered.
     var removeOption: String?
-    // Optional - enables verbose logging
+    // Optional - enables verbose logging.
     var verboseMode: String?
-    // Initialize MessageContent
+    // Initialize MessageContent.
     init(messageContent: String? = nil, removeOption: String? = nil, verboseMode: String? = nil) {
         self.messageContent = messageContent
         self.removeOption = removeOption
@@ -71,27 +71,27 @@ struct RootElements: Codable {
     }
 }
 
-// For storing data in the notifications userInfo
+// For storing data in the notifications userInfo.
 struct UserInfo: Codable {
-    // Optional - action to perform when the message is clicked
+    // Optional - action to perform when the message is clicked.
     var messageAction: [TaskObject]?
-    // Optional - action to perform when the message button is clicked
+    // Optional - action to perform when the message button is clicked.
     var messageButtonAction: [TaskObject]?
-    // Optional - action to perform when the second message button is clicked
+    // Optional - action to perform when the second message button is clicked.
     var messageButton2Action: [TaskObject]?
-    // Arguments for the task object
+    // Arguments for the task object.
     struct TaskObject: Codable {
-        // The tasks executable
+        // The tasks executable.
         var taskPath: String?
-        // Arguments to pass to the task executable
+        // Arguments to pass to the task executable.
         var taskArguments: [String]?
     }
-    // Initialize ParsedArguments
+    // Initialize ParsedArguments.
     init(messageAction: [TaskObject]? = nil, messageButtonAction: [TaskObject]? = nil,
          messageButton2Action: [TaskObject]? = nil) {
         self.messageAction = messageAction
         self.messageButtonAction = messageButtonAction
-        // Assign the second message button action
+        // Assign the second message button action.
         self.messageButton2Action = messageButton2Action
     }
 }

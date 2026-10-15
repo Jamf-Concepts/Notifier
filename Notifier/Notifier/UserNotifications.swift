@@ -1,11 +1,11 @@
 //
-//  UserNotifications.swift
-//  Notifiers - Alerts
+//  UserNotifications.swift.
+//  Notifiers - Alerts.
 //
 //  Copyright © 2020 - 2026 Jamf. All rights reserved.
 //
 
-// Imports
+// Imports.
 import UserNotifications
 
 /// Returns the notification body string from the value passed to `--message`.
@@ -17,12 +17,12 @@ import UserNotifications
 ///   The string passed to `--message`.
 ///
 func setNotificationBody(parsedResult: ArgParser) -> String {
-    // If verbose mode is enabled
+    // If verbose mode is enabled...
     if parsedResult.verbose {
-        // Progress log
+        // Progress log.
         NSLog("\(#function.components(separatedBy: "(")[0]): \(parsedResult.message)")
     }
-    // Returns the value passed to --message
+    // Returns the value passed to --message.
     return parsedResult.message
 }
 
@@ -35,12 +35,12 @@ func setNotificationBody(parsedResult: ArgParser) -> String {
 ///   The string passed to `--messagebutton`.
 ///
 func setNotificationMessageButton(parsedResult: ArgParser) -> String {
-    // If verbose mode is enabled
+    // If verbose mode is enabled...
     if parsedResult.verbose {
-        // Progress log
+        // Progress log.
         NSLog("\(#function.components(separatedBy: "(")[0]): \(parsedResult.messagebutton)")
     }
-    // Returns the value passed to --messagebutton
+    // Returns the value passed to --messagebutton.
     return parsedResult.messagebutton
 }
 
@@ -53,12 +53,12 @@ func setNotificationMessageButton(parsedResult: ArgParser) -> String {
 ///   The string passed to `--messagebutton2`.
 ///
 func setNotificationMessageButton2(parsedResult: ArgParser) -> String {
-    // If verbose mode is enabled
+    // If verbose mode is enabled...
     if parsedResult.verbose {
-        // Progress log
+        // Progress log.
         NSLog("\(#function.components(separatedBy: "(")[0]): \(parsedResult.messagebutton2)")
     }
-    // Returns the value passed to --messagebutton2
+    // Returns the value passed to --messagebutton2.
     return parsedResult.messagebutton2
 }
 
@@ -71,12 +71,12 @@ func setNotificationMessageButton2(parsedResult: ArgParser) -> String {
 ///   The string passed to `--sound`.
 ///
 func setNotificationSound(parsedResult: ArgParser) -> String {
-    // If verbose mode is enabled
+    // If verbose mode is enabled...
     if parsedResult.verbose {
-        // Progress log
+        // Progress log.
         NSLog("\(#function.components(separatedBy: "(")[0]): \(parsedResult.sound)")
     }
-    // Returns the value passed to --sound
+    // Returns the value passed to --sound.
     return parsedResult.sound
 }
 
@@ -89,12 +89,12 @@ func setNotificationSound(parsedResult: ArgParser) -> String {
 ///   The string passed to `--subtitle`.
 ///
 func setNotificationSubtitle(parsedResult: ArgParser) -> String {
-    // If verbose mode is enabled
+    // If verbose mode is enabled...
     if parsedResult.verbose {
-        // Progress log
+        // Progress log.
         NSLog("\(#function.components(separatedBy: "(")[0]): \(parsedResult.subtitle)")
     }
-    // Returns the value passed to --subtitle
+    // Returns the value passed to --subtitle.
     return parsedResult.subtitle
 }
 
@@ -107,11 +107,11 @@ func setNotificationSubtitle(parsedResult: ArgParser) -> String {
 ///   The string passed to `--title`.
 ///
 func setNotificationTitle(parsedResult: ArgParser) -> String {
-    // If verbose mode is enabled
+    // If verbose mode is enabled...
     if parsedResult.verbose {
-        // Progress log
+        // Progress log.
         NSLog("\(#function.components(separatedBy: "(")[0]): \(parsedResult.title)")
     }
-    // Returns the value passed to --title
+    // Returns the value passed to --title.
     return parsedResult.title
 }
