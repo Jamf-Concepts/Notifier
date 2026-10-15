@@ -20,7 +20,7 @@ struct NotificationActionOptions: ParsableArguments {
                     \t\t • --messageaction        - Fires when the notification body itself is clicked.
                     \t\t • --messagebuttonaction  - Requires --messagebutton. Fires when --messagebutton is clicked.
                     \t\t • --messagebutton2action - Requires --messagebutton2. Fires when --messagebutton2 is clicked.
-                    \t\t • --messagedismissaction - Fires when the user clicks the X to explicitly dismiss the \
+                    \t\t • --messagedismissaction - Fires when the user clicks the (X) to explicitly dismiss the \
                     notification.
 
                     \t\t The following values can be passed to any action option:
