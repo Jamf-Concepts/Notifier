@@ -1,333 +1,369 @@
 //
-//  UserNotifications.swift
-//  Notifiers - Alerts
+//  UserNotifications.swift.
+//  Notifiers - Alerts.
 //
-//  Copyright © 2024 dataJAR Ltd. All rights reserved.
+//  Copyright © 2020 - 2026 Jamf. All rights reserved.
 //
 
-// Imports
+// Imports.
 import UserNotifications
 
-// Returns the notifications body
-func getNotificationBody(messageContent: MessageContent, rootElements: RootElements) -> String {
-    // If verbose mode is enabled
+/// Builds a `userInfo`-compatible action dictionary from the first element of a ``MessageContent/TaskObject`` array.
+///
+/// - Parameters:
+///   - taskObjects: An array of ``MessageContent/TaskObject`` values; only the first element is used.
+///   - verboseLabel: A label string used in verbose log output to identify the action type.
+///   - rootElements: Used to check verbose mode.
+///
+/// - Returns:
+///   A dictionary with `taskPath` and `taskArguments` keys.
+///
+func buildButtonActionDict(taskObjects: [MessageContent.TaskObject],
+                           verboseLabel: String, rootElements: RootElements) -> [AnyHashable: Any] {
+    // Var declaration.
+    var actionDict = [AnyHashable: Any]()
+    // Add taskPath to the action dictionary.
+    actionDict["taskPath"] = taskObjects[0].taskPath
+    // Add taskArguments to the action dictionary.
+    actionDict["taskArguments"] = taskObjects[0].taskArguments
+    // If verbose mode is enabled...
     if rootElements.verboseMode != nil {
-        // Progress log
+        // Progress log.
+        NSLog("""
+              \(#function.components(separatedBy: "(")[0]) - \(verboseLabel) - taskPath: \
+              \(actionDict["taskPath"] ?? ""),
+              taskArguments: \(actionDict["taskArguments"] ?? [])
+              """)
+    }
+    // Return the populated action dictionary.
+    return actionDict
+}
+
+/// Returns the notification body string from the decoded message content.
+///
+/// - Parameters:
+///   - messageContent: The decoded notification content.
+///   - rootElements: Used to check verbose mode.
+///
+/// - Returns:
+///   The `messageBody` string.
+///
+func getNotificationBody(messageContent: MessageContent, rootElements: RootElements) -> String {
+    // If verbose mode is enabled...
+    if rootElements.verboseMode != nil {
+        // Progress log.
         NSLog("\(#function.components(separatedBy: "(")[0]) - messageBody: \(messageContent.messageBody!)")
     }
-    // Return messageBody, forcing as this is set unless we remove all.. and if we aren we won't get here
+    // Return messageBody, forcing as this is set unless we remove all.. and if we aren't we won't get here.
     return messageContent.messageBody!
 }
 
-// Returns the notifications body's action
+/// Builds and returns the action dictionary for the notification body click action.
+///
+/// - Parameters:
+///   - messageContent: The decoded notification content containing `messageAction`.
+///   - rootElements: Used to check verbose mode.
+///
+/// - Returns:
+///   A dictionary with `taskPath` and `taskArguments` keys for the message action.
+///
 func getNotificationBodyAction(messageContent: MessageContent, rootElements: RootElements) -> [AnyHashable: Any] {
-    // Var declaration
+    // Var declaration.
     var messageAction = [AnyHashable: Any]()
-    // Add taskPath from messagAction to messageAction
+    // Add taskPath from messagAction to messageAction.
     messageAction["taskPath"] = messageContent.messageAction?[0].taskPath
-    // Add taskArguments from messageAction
+    // Add taskArguments from messageAction.
     messageAction["taskArguments"] = messageContent.messageAction?[0].taskArguments
-    // If verbose mode is enabled
+    // If verbose mode is enabled...
     if rootElements.verboseMode != nil {
-        // Progress log
+        // Progress log.
         NSLog("""
               \(#function.components(separatedBy: "(")[0]) - messageAction - taskPath: \
               \(messageAction["taskPath"] ?? ""), taskArguments: \(messageAction["taskArguments"] ?? [])
               """)
     }
-    // Return messageAction
+    // Return messageAction.
     return messageAction
 }
 
-// Returns the notifications sound
+/// Returns the `UNNotificationSound` to use, falling back to the default sound if `"default"` is specified.
+///
+/// - Parameters:
+///   - messageContent: The decoded notification content containing `messageSound`.
+///   - rootElements: Used to check verbose mode.
+///
+/// - Returns:
+///   A `UNNotificationSound` instance for the specified sound name.
+///
 func getNotificationSound(messageContent: MessageContent, rootElements: RootElements) -> UNNotificationSound {
-    // Var declaration
+    // Var declaration.
     var tempSound = UNNotificationSound.default
-    // If we're not using macOS's default sound
+    // If we're not using macOS's default sound...
     if messageContent.messageSound?.lowercased() != "default" {
-        // Set the notifications sound
+        // Set the notifications sound.
         tempSound = UNNotificationSound(named: UNNotificationSoundName(rawValue: messageContent.messageSound ?? ""))
     }
-    // If verbose mode is enabled
+    // If verbose mode is enabled...
     if rootElements.verboseMode != nil {
-        // Progress log
+        // Progress log.
         NSLog("\(#function.components(separatedBy: "(")[0]) - messageSound - set to: \(tempSound)")
     }
-    // Return tempSound
+    // Return tempSound.
     return tempSound
 }
 
-// Returns the notifications subtitle
+/// Returns the notification subtitle string from the decoded message content.
+///
+/// - Parameters:
+///   - messageContent: The decoded notification content containing `messageSubtitle`.
+///   - rootElements: Used to check verbose mode.
+///
+/// - Returns:
+///   The `messageSubtitle` string, or an empty string if not set.
+///
 func getNotificationSubtitle(messageContent: MessageContent, rootElements: RootElements) -> String {
-    // If verbose mode is enabled
+    // If verbose mode is enabled...
     if rootElements.verboseMode != nil {
-        // Progress log
+        // Progress log.
         NSLog("\(#function.components(separatedBy: "(")[0]) - messageBody: \(messageContent.messageSubtitle ?? "")")
     }
-    // Return messageSubtitle
+    // Return messageSubtitle.
     return messageContent.messageSubtitle ?? ""
 }
 
-// Returns the notifications title
+/// Returns the notification title string from the decoded message content.
+///
+/// - Parameters:
+///   - messageContent: The decoded notification content containing `messageTitle`.
+///   - rootElements: Used to check verbose mode.
+///
+/// - Returns:
+///   The `messageTitle` string, or an empty string if not set.
+///
 func getNotificationTitle(messageContent: MessageContent, rootElements: RootElements) -> String {
-    // If verbose mode is enabled
+    // If verbose mode is enabled...
     if rootElements.verboseMode != nil {
-        // Progress log
+        // Progress log.
         NSLog("\(#function.components(separatedBy: "(")[0]) - messageBody: \(messageContent.messageTitle ?? "")")
     }
-    // Return messageTitle
+    // Return messageTitle.
     return messageContent.messageTitle ?? ""
 }
 
-// Handles when a notification is interacted with
-func handleNotification(forResponse response: UNNotificationResponse) {
-    // Retrieve userInfo from the response object
-    let userInfo = response.notification.request.content.userInfo
-    // If verboseMode is set
-    if userInfo["verboseMode"] != nil {
-        // Progress log
-        NSLog("\(#function.components(separatedBy: "(")[0]) - message - interacted: \(userInfo)")
-    }
-    // Triggered when the notification message is clicked
-    if response.actionIdentifier == "com.apple.UNNotificationDefaultActionIdentifier" {
-        // If verbose mode is set
-        if userInfo["verboseMode"] != nil {
-            // Progress log
-            NSLog("\(#function.components(separatedBy: "(")[0]) - message - clicked")
-        }
-        // Performs any actions set when the user clicks the message
-        processNotificationActions(userInfoKey: "messageAction", userInfo: userInfo)
-    // If the notification was dismissed
-    } else if response.actionIdentifier == "com.apple.UNNotificationDismissActionIdentifier" {
-        // If verbose mode is set
-        if userInfo["verboseMode"] != nil {
-            // Progress log
-            NSLog("\(#function.components(separatedBy: "(")[0]) - message - message was dismissed")
-        }
-    // If the messageButton was clicked
-    } else {
-        // If verbose mode is set
-        if userInfo["verboseMode"] != nil {
-            // Progress log
-            NSLog("""
-                  \(#function.components(separatedBy: "(")[0]) - message button - \
-                  clicked - userInfo \(String(describing: userInfo))
-                  """)
-        }
-        // Performs any actions set when the user clicks the messagebutton
-        processNotificationActions(userInfoKey: "messageButtonAction", userInfo: userInfo)
-    }
-    // If verbose mode is set
-    if userInfo["verboseMode"] != nil {
-        // Progress log
-        NSLog("\(#function.components(separatedBy: "(")[0]) - message - removing notification")
-    }
-    // Remove the delivered notification
-    UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers:
-                                                                        [response.notification.request.identifier])
-    // If verbose mode is set
-    if userInfo["verboseMode"] != nil {
-        // Progress log
-        NSLog("\(#function.components(separatedBy: "(")[0]) - message - removing notification - done")
-    }
-    // Exit
-    exit(0)
-}
-
-// Adds messageButton (always needed) and messageButtonAction (when defined)
-func processMessageButton(notificationCenter: UNUserNotificationCenter, messageContent: MessageContent,
-                          rootElements: RootElements) ->
-        ([AnyHashable: Any], UNNotificationCategory) {
-    // Var declaration
-    var tempCategory = UNNotificationCategory(identifier: "alert", actions: [], intentIdentifiers: [],
-                                              options: .customDismissAction)
-    var messageButtonAction = [AnyHashable: Any]()
-    // If we have a value for messageButton passed
-    if messageContent.messageButton != nil {
-        // Create an action object
-        let notificationAction = UNNotificationAction(identifier: "messagebutton",
-                                                      title: messageContent.messageButton ?? "",
-                                                      options: [])
-        // Amend tempCategory
-        tempCategory = UNNotificationCategory(identifier: "alert", actions: [notificationAction],
-                                              intentIdentifiers: [],
-                                              options: .customDismissAction)
-        // If verbose mode is enabled
-        if rootElements.verboseMode != nil {
-            // Progress log
-            NSLog("\(#function.components(separatedBy: "(")[0]) - messagebutton processed")
-        }
-        // If we have a values for messageButton and messageButtonAction passed
-        if messageContent.messageButtonAction != nil {
-            // Add taskPath from messagAction to messageButtonAction
-            messageButtonAction["taskPath"] = messageContent.messageButtonAction?[0].taskPath
-            // Add taskArguments from messageButtonAction
-            messageButtonAction["taskArguments"] =
-            messageContent.messageButtonAction?[0].taskArguments
-            // If verbose mode is enabled
-            if rootElements.verboseMode != nil {
-                // Progress log
-                NSLog("""
-                      \(#function.components(separatedBy: "(")[0]) - messageButtonAction - taskPath: \
-                      \(messageButtonAction["taskPath"] ?? ""),
-                      taskArguments: \(messageButtonAction["taskArguments"] ?? [])
-                      """)
-            }
-            // Return tempCategory and tempUserInfo
-            return (messageButtonAction, tempCategory)
-        }
-        // If we don't have a value for messageButton
-    } else {
-        // If verbose mode is enabled
-        if rootElements.verboseMode != nil {
-            // Progress log
-            NSLog("\(#function.components(separatedBy: "(")[0]) - no messagebutton defined")
-        }
-    }
-    // Return empty userInfo for messageButtonAction and tempCategory
-    return ([:], tempCategory)
-}
-
-// Post the notification
+/// Schedules the notification request with Notification Center and confirms delivery.
+///
+/// Uses `passedBase64` as the notification identifier so it can be removed later.
+/// Exits with code `0` on successful delivery or `1` on scheduling error.
+///
+/// - Parameters:
+///   - notificationCenter: The `UNUserNotificationCenter` instance to post to.
+///   - notificationContent: The fully populated `UNMutableNotificationContent`.
+///   - messageContent: The decoded notification content, reserved for future use.
+///   - passedBase64: The base64 string used as the notification identifier.
+///   - rootElements: Used to check verbose mode and pass the `verboseMode` string to inner calls.
+///
 func postNotification(notificationCenter: UNUserNotificationCenter, notificationContent: UNMutableNotificationContent,
                       messageContent: MessageContent, passedBase64: String, rootElements: RootElements) {
-    // If we're in verbose mode
+    // If we're in verbose mode...
     if rootElements.verboseMode != nil {
-        // Progress log
+        // Progress log.
         NSLog("""
               \(#function.components(separatedBy: "(")[0]) - notification \
               request - notificationContent - \(notificationContent).
               """)
     }
-    // Create the request object
+    // Create the request object.
     let notificationRequest = UNNotificationRequest(identifier: passedBase64, content: notificationContent,
                                                     trigger: nil)
-    // Post the notification
-    notificationCenter.add(notificationRequest)
-    // If we're in verbose mode
-    if rootElements.verboseMode != nil {
-        // Progress log
-        NSLog("\(#function.components(separatedBy: "(")[0]) - notification delivered")
-    }
-    // Sleep, so we don't exit before the notification has been delivered
-    sleep(1)
-    // Exit
-    exit(0)
-}
-
-// Process actions when interacted
-func processNotificationActions(userInfoKey: String, userInfo: [AnyHashable: Any]) {
-    // Var declaration
-    var messageActionDict = [String: Any]()
-    // If we have a userInfoKey in the notifications userinfo
-    if userInfo[userInfoKey] != nil {
-        // If verbose mode is set
-        if userInfo["verboseMode"] != nil {
-            // Progress log
-            NSLog("\(#function.components(separatedBy: "(")[0]) - \(userInfoKey) - \(userInfo[userInfoKey] ?? [])")
-        }
-        // Convert userInfo[userInfoKey] to a dict
-        messageActionDict = userInfo[userInfoKey] as? [String: Any] ?? [:]
-        // If we have logout as taskPath
-        if messageActionDict["taskPath"] as? String == "logout" {
-            // If verbose mode is set
-            if userInfo["verboseMode"] != nil {
-                // Progress log
-                NSLog("\(#function.components(separatedBy: "(")[0]) - \(userInfoKey) - logout")
-            }
-            // Prompt to logout
-            gracefulLogout(userInfo: userInfo)
-        // If we have an action thaty's not logout
-        } else {
-            // If verbose mode is set
-            if userInfo["verboseMode"] != nil {
-                // Progress log
-                NSLog("\(#function.components(separatedBy: "(")[0]) - \(userInfoKey) - \(userInfo[userInfoKey] ?? [])")
-            }
-            // Run the task, returning boolean
-            let (taskOutput, taskStatus) = runTask(taskPath: messageActionDict["taskPath"] as? String ?? "",
-                                                   taskArguments: messageActionDict["taskArguments"]
-                                                   as? [String] ?? [], userInfo: userInfo)
-            // If verbose mode is set
-            if userInfo["verboseMode"] != nil {
-                // If the task completed successfully
-                if taskStatus {
-                    // Progress log
-                    NSLog("""
-                          "\(messageActionDict["taskPath"] ?? "") \(messageActionDict["taskArguments"] ?? [])"
-                          completed successfully, returned output: \(taskOutput)
-                          """)
-                // If task failed to run
-                } else {
-                    // Post error
-                    postToNSLogAndStdOut(logLevel: "ERROR", logMessage:
-                                            """
-                                            Running: \(messageActionDict["taskPath"] ?? "")
-                                            \(messageActionDict["taskArguments"] ?? []) failed with \(taskOutput).
-                                            """, functionName: #function.components(separatedBy: "(")[0],
-                                            verboseMode: "enabled")
-                }
-            }
-        }
-    }
-}
-
-// If we're to remove a specific prior posted notification
-func removePriorNotification(notificationCenter: UNUserNotificationCenter, messageContent: MessageContent,
-                             passedBase64: String, rootElements: RootElements) {
-    // If we're in verbose mode
-    if rootElements.verboseMode != nil {
-        // Progress log
-        NSLog("\(#function.components(separatedBy: "(")[0]) - remove prior - passedBase64 - [\(passedBase64)]")
-    }
-    // Remove any prior notifications with the same identifier as ncContentbase64
-    notificationCenter.removeDeliveredNotifications(withIdentifiers: [passedBase64])
-    // If we're in verbose mode
-    if rootElements.verboseMode != nil {
-        // Progress log
-        NSLog("\(#function.components(separatedBy: "(")[0]) - remove prior - done")
-    }
-    // Sleep, so we don't exit before notification(s) have been removed
-    sleep(1)
-    // Exit
-    exit(0)
-}
-
-// If we're to remove all prior posted notifications
-func removeAllPriorNotifications(notificationCenter: UNUserNotificationCenter, messageContent: MessageContent,
-                                 rootElements: RootElements) {
-    // If we're in verbose mode
-    if rootElements.verboseMode != nil {
-        // Verbose message
-        NSLog("\(#function.components(separatedBy: "(")[0]) - remove all")
-    }
-    // Remove all delivered notifications
-    notificationCenter.removeAllDeliveredNotifications()
-    // If we're in verbose mode
-    if rootElements.verboseMode != nil {
-        // Progress log
-        NSLog("\(#function.components(separatedBy: "(")[0]) - remove all - done")
-    }
-    // Sleep, so we don't exit before notification(s) have been removed
-    sleep(1)
-    // Exit
-    exit(0)
-}
-
-// Request authorisation
-func requestAuthorisation(verboseMode: String) {
-        // Check authorization status with the UNUserNotificationCenter object
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { (granted, _) in
-        if !granted {
-            // Post error
-            postToNSLogAndStdOut(logLevel: "ERROR", logMessage: """
-                                 Authorisation not granted to post notifications, either manually approve \
-                                 notifications for this application or deploy a Notification PPPCP to this Mac, and \
-                                 try posting the message again...
-                                 """, functionName: #function.components(separatedBy: "(")[0],
-                                 verboseMode: "verboseMode")
-            // Exit
+    // Post the notification, using the completion handler to catch any scheduling errors.
+    notificationCenter.add(notificationRequest) { error in
+        // If the notification failed to schedule...
+        if let error = error {
+            // Post error.
+            postToNSLogAndStdOut(logLevel: "ERROR",
+                                 logMessage: "Failed to post notification: \(error.localizedDescription)",
+                                 functionName: #function.components(separatedBy: "(")[0],
+                                 verboseMode: rootElements.verboseMode ?? "")
+            // Exit.
             exit(1)
         }
+        // If we're in verbose mode...
+        if rootElements.verboseMode != nil {
+            // Progress log.
+            NSLog("\(#function.components(separatedBy: "(")[0]) - notification scheduled")
+        }
+        // Sleep, so we don't exit before the notification has been delivered.
+        sleep(1)
+        // Check with Notification Center what was delivered.
+        notificationCenter.getDeliveredNotifications { notifications in
+            // Find the notification we posted by its identifier.
+            if notifications.first(where: { $0.request.identifier == passedBase64 }) != nil {
+                // Post progress.
+                postToNSLogAndStdOut(logLevel: "INFO", logMessage: "notification delivered successfully!",
+                                     functionName: #function.components(separatedBy: "(")[0],
+                                     verboseMode: rootElements.verboseMode ?? "")
+            }
+            // Exit.
+            exit(0)
+        }
     }
+}
+
+/// Builds the `UNNotificationCategory` for the notification, including any defined button actions.
+///
+/// Always returns a category (required by the notification system). Delegates to
+/// ``processMessageButton2(notificationAction:messageContent:rootElements:)`` when a second button is defined.
+///
+/// - Parameters:
+///   - notificationCenter: The `UNUserNotificationCenter` instance, reserved for future use.
+///   - messageContent: The decoded notification content containing button labels and actions.
+///   - rootElements: Used to check verbose mode.
+///
+/// - Returns:
+///   A tuple of the first button action dictionary, second button action dictionary
+///   (empty if not defined), and the `UNNotificationCategory`.
+///
+func processMessageButton(notificationCenter: UNUserNotificationCenter, messageContent: MessageContent,
+                          rootElements: RootElements) ->
+        ([AnyHashable: Any], [AnyHashable: Any], UNNotificationCategory) {
+    // Var declaration.
+    var tempCategory = UNNotificationCategory(identifier: "alert", actions: [], intentIdentifiers: [],
+                                              options: .customDismissAction)
+    // Var declaration for the second message button action.
+    var messageButton2Action = [AnyHashable: Any]()
+    // If we have a value for messageButton passed...
+    if messageContent.messageButton != nil {
+        // Create an action object for the first button.
+        let notificationAction = UNNotificationAction(identifier: "messagebutton",
+                                                      title: messageContent.messageButton ?? "",
+                                                      options: [])
+        // Amend tempCategory to include the first button action.
+        tempCategory = UNNotificationCategory(identifier: "alert", actions: [notificationAction],
+                                              intentIdentifiers: [],
+                                              options: .customDismissAction)
+        // If verbose mode is enabled...
+        if rootElements.verboseMode != nil {
+            // Progress log.
+            NSLog("\(#function.components(separatedBy: "(")[0]) - messagebutton processed")
+        }
+        // If a second message button label was also passed...
+        if messageContent.messageButton2 != nil {
+            // Process the second button, updating the category to include both buttons.
+            (messageButton2Action, tempCategory) = processMessageButton2(notificationAction: notificationAction,
+                                                                         messageContent: messageContent,
+                                                                         rootElements: rootElements)
+        }
+        // If we have values for messageButton and messageButtonAction passed...
+        if messageContent.messageButtonAction != nil {
+            // Build the first button action dictionary.
+            let messageButtonAction = buildButtonActionDict(taskObjects: messageContent.messageButtonAction!,
+                                                            verboseLabel: "messageButtonAction",
+                                                            rootElements: rootElements)
+            // Return messageButtonAction, messageButton2Action and tempCategory.
+            return (messageButtonAction, messageButton2Action, tempCategory)
+        }
+    // If we don't have a value for messageButton...
+    } else {
+        // If verbose mode is enabled...
+        if rootElements.verboseMode != nil {
+            // Progress log.
+            NSLog("\(#function.components(separatedBy: "(")[0]) - no messagebutton defined")
+        }
+    }
+    // Return empty dicts for messageButtonAction and messageButton2Action, along with tempCategory.
+    return ([:], [:], tempCategory)
+}
+
+/// Creates the second notification button action and returns an updated category containing both buttons.
+///
+/// - Parameters:
+///   - notificationAction: The first button's `UNNotificationAction`, included in the updated category.
+///   - messageContent: The decoded notification content containing the second button label and optional action.
+///   - rootElements: Used to check verbose mode.
+///
+/// - Returns:
+///   A tuple of the second button's action dictionary (empty if no action set)
+///   and the updated `UNNotificationCategory`.
+///
+func processMessageButton2(notificationAction: UNNotificationAction, messageContent: MessageContent,
+                           rootElements: RootElements) ->
+        ([AnyHashable: Any], UNNotificationCategory) {
+    // Create an action object for the second button.
+    let notificationAction2 = UNNotificationAction(identifier: "messagebutton2",
+                                                   title: messageContent.messageButton2 ?? "",
+                                                   options: [])
+    // Build a category that includes both button actions.
+    let updatedCategory = UNNotificationCategory(identifier: "alert",
+                                                 actions: [notificationAction, notificationAction2],
+                                                 intentIdentifiers: [],
+                                                 options: .customDismissAction)
+    // If verbose mode is enabled...
+    if rootElements.verboseMode != nil {
+        // Progress log.
+        NSLog("\(#function.components(separatedBy: "(")[0]) - messagebutton2 processed")
+    }
+    // If a second button action was also passed, build and return the action dictionary...
+    if messageContent.messageButton2Action != nil {
+        // Build the second button action dictionary.
+        let messageButton2Action = buildButtonActionDict(taskObjects: messageContent.messageButton2Action!,
+                                                        verboseLabel: "messageButton2Action",
+                                                        rootElements: rootElements)
+        // Return the second button action dict and the updated category.
+        return (messageButton2Action, updatedCategory)
+    }
+    // Return an empty action dict and the updated category.
+    return ([:], updatedCategory)
+}
+
+/// Removes all prior delivered notifications and exits.
+///
+/// - Parameters:
+///   - notificationCenter: The `UNUserNotificationCenter` instance to use.
+///   - messageContent: The decoded notification content, reserved for future use.
+///   - rootElements: Used to check verbose mode.
+///
+func removeAllPriorNotifications(notificationCenter: UNUserNotificationCenter, messageContent: MessageContent,
+                                 rootElements: RootElements) {
+    // If we're in verbose mode...
+    if rootElements.verboseMode != nil {
+        // Verbose message.
+        NSLog("\(#function.components(separatedBy: "(")[0]) - remove all")
+    }
+    // Remove all delivered notifications.
+    notificationCenter.removeAllDeliveredNotifications()
+    // Post success...
+    postToNSLogAndStdOut(logLevel: "INFO", logMessage: "removed all prior delivered alert notifications!",
+                         functionName: #function.components(separatedBy: "(")[0],
+                         verboseMode: rootElements.verboseMode ?? "")
+    // Sleep, so we don't exit before notification(s) have been removed.
+    sleep(1)
+    // Exit.
+    exit(0)
+}
+
+/// Removes the specific prior posted notification matching `passedBase64` and exits.
+///
+/// - Parameters:
+///   - notificationCenter: The `UNUserNotificationCenter` instance to use.
+///   - messageContent: The decoded notification content, reserved for future use.
+///   - passedBase64: The base64 identifier of the notification to remove.
+///   - rootElements: Used to check verbose mode.
+///
+func removePriorNotification(notificationCenter: UNUserNotificationCenter, messageContent: MessageContent,
+                             passedBase64: String, rootElements: RootElements) {
+    // If we're in verbose mode...
+    if rootElements.verboseMode != nil {
+        // Progress log.
+        NSLog("\(#function.components(separatedBy: "(")[0]) - remove prior - passedBase64 - [\(passedBase64)]")
+    }
+    // Remove any prior notifications with the same identifier as ncContentbase64.
+    notificationCenter.removeDeliveredNotifications(withIdentifiers: [passedBase64])
+    // Post success...
+    postToNSLogAndStdOut(logLevel: "INFO", logMessage: "removed requested prior delivered alert notification!",
+                         functionName: #function.components(separatedBy: "(")[0],
+                         verboseMode: rootElements.verboseMode ?? "")
+    // Sleep, so we don't exit before notification(s) have been removed.
+    sleep(1)
+    // Exit.
+    exit(0)
 }

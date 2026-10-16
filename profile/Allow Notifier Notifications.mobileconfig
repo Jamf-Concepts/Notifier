@@ -13,7 +13,7 @@
 					<key>BadgesEnabled</key>
 					<true/>
 					<key>BundleIdentifier</key>
-					<string>uk.co.dataJAR.NotifierNotifications</string>
+					<string>com.jamf.notifier.notifications</string>
 					<key>CriticalAlertEnabled</key>
 					<false/>
 					<key>NotificationsEnabled</key>
@@ -31,7 +31,7 @@
 					<key>BadgesEnabled</key>
 					<true/>
 					<key>BundleIdentifier</key>
-					<string>uk.co.dataJAR.NotifierAlerts</string>
+					<string>com.jamf.notifier.alerts</string>
 					<key>CriticalAlertEnabled</key>
 					<false/>
 					<key>NotificationsEnabled</key>
@@ -44,36 +44,24 @@
 					<true/>
 				</dict>
 			</array>
-			<key>PayloadDescription</key>
-			<string></string>
 			<key>PayloadDisplayName</key>
 			<string>Allow Notifier Notifications</string>
-			<key>PayloadEnabled</key>
-			<true/>
 			<key>PayloadIdentifier</key>
-			<string>com.github.erikberglund.ProfileCreator.640EBF16-58E0-42CE-83D3-9BC3A2A6010E.com.apple.notificationsettings.86ADF17C-0236-44C6-B2C2-00037C0C1CC3</string>
-			<key>PayloadOrganization</key>
-			<string>dataJAR Ltd</string>
+			<string>B11468DB-7043-4798-A2B5-08CB0F49045D</string>
 			<key>PayloadType</key>
 			<string>com.apple.notificationsettings</string>
 			<key>PayloadUUID</key>
-			<string>86ADF17C-0236-44C6-B2C2-00037C0C1CC3</string>
+			<string>7B8607D3-C9FD-432C-915E-D5899D973E84</string>
 			<key>PayloadVersion</key>
 			<integer>1</integer>
 		</dict>
 	</array>
-	<key>PayloadDescription</key>
-	<string></string>
 	<key>PayloadDisplayName</key>
 	<string>Allow Notifier Notifications</string>
-	<key>PayloadEnabled</key>
-	<true/>
 	<key>PayloadIdentifier</key>
 	<string>C4B6FAAA-D592-4FA2-BF68-F8994C05FF0D</string>
 	<key>PayloadOrganization</key>
-	<string>dataJAR Ltd</string>
-	<key>PayloadRemovalDisallowed</key>
-	<true/>
+	<string>Jamf</string>
 	<key>PayloadScope</key>
 	<string>System</string>
 	<key>PayloadType</key>
@@ -82,5 +70,7 @@
 	<string>C4B6FAAA-D592-4FA2-BF68-F8994C05FF0D</string>
 	<key>PayloadVersion</key>
 	<integer>1</integer>
+	<key>TargetDeviceType</key>
+	<integer>5</integer>
 </dict>
 </plist>

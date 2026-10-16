@@ -1,6 +1,6 @@
 <details>
 <summary>Licensed under the Apache License, Version 2.0 </summary>
-Copyright 2024 Jamf LTD
+Copyright 2026 Jamf.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -8,89 +8,94 @@ Unless required by applicable law or agreed to in writing, software distributed 
 </details>
 
 # Notifier
-<p align="center"><img width="256" alt="Alert" src="https://github.com/dataJAR/Notifier/assets/2464974/d8d2cca1-250c-4601-a1d5-1fea2330ba14">
+<p align="center"><img width="256" alt="Alert" src="https://github.com/Jamf-Concepts/Notifier/assets/2464974/d8d2cca1-250c-4601-a1d5-1fea2330ba14">
 
-Notifier is a Swift app which can post alert or banner notifications on macOS 10.15+ clients.
+Notifier is a Swift app which can post alert or banner notifications on macOS 12.0+ clients.
 
 Notifications are delivered via the [UserNotifications Framework](https://developer.apple.com/documentation/usernotifications)
 
 # Usage
 ## Basic Usage
 ```
-OVERVIEW: Notifier 3.1: Posts alert or banner notifications.
+OVERVIEW: Notifier 4.0: Posts alert or banner style notifications to the logged-in user.
 
-USAGE: --type <alert/banner> --message <some message> <options>
-       --type <alert/banner> --remove prior <some message> <options>
-       --type <alert/banner> --remove all
+USAGE: --type <alert|banner> --message <message> [options]
+       --type <alert|banner> --message <message> --messageaction <action>
+       --type <alert|banner> --message <message> --messagebutton <label> --messagebuttonaction <action>
+       --type <alert|banner> --message <message> --messagebutton <label> --messagebutton2 <label> --messagebutton2action <action>
+       --type <alert|banner> --message <message> --messagedismissaction <action>
+       --type <alert|banner> --remove prior --message <message> [options]
+       --type <alert|banner> --remove all
        --rebrand <path to image>
 
-OPTIONS:
-  --type <type>           alert or banner - REQUIRED.
-
-  --message <message>     The notifications message.
-
+NOTIFICATION ACTIONS:
   --messageaction <messageaction>
-                          The action to be performed under the users account
-                          when the message is clicked.
+                          The action to perform when the notification body is clicked.
+        		 Each action option applies to a different interaction point on the notification:
 
-                          • Passing 'logout' will prompt the user to logout.
-                          • If passed a single item, this will be launched via:
-                          /usr/bin/open
-                          • More complex commands can be passed, but the 1st
-                          argument needs to be a binaries path.
+        		 • --messageaction        - Fires when the notification body itself is clicked.
+        		 • --messagebuttonaction  - Requires --messagebutton. Fires when --messagebutton is clicked.
+        		 • --messagebutton2action - Requires --messagebutton2. Fires when --messagebutton2 is clicked.
+        		 • --messagedismissaction - Fires when the user clicks the (X) to explicitly dismiss the notification.
 
-                          For example: "/usr/bin/open" will work, "open" will
-                          not.
+        		 The following values can be passed to any action option:
 
-  --messagebutton <messagebutton>
-                          Adds a button to the message, with the label being
-                          what is passed.
+        		 • 'logout'              - Prompts the logged-in user to log out.
+        		 • A single path or URL  - Opened via /usr/bin/open (e.g. https://example.com).
+        		 • A binary path + args  - The first argument must be a full path to a binary.
+
+        		 For example: "/usr/bin/open" will work, "open" will not.
 
   --messagebuttonaction <messagebuttonaction>
-                          The action to be performed under the users account
-                          when the optional message button is clicked.
+                          The action to perform when --messagebutton is clicked. Requires --messagebutton to be passed. See --messageaction for format details.
 
-                          • Passing 'logout' will prompt the user to logout.
-                          • If passed a single item, this will be launched via:
-                          /usr/bin/open
-                          • More complex commands can be passed, but the 1st
-                          argument needs to be a binaries path.
+  --messagebutton2action <messagebutton2action>
+                          The action to perform when --messagebutton2 is clicked. Requires --messagebutton2 to be passed. See --messageaction for format details.
 
-                          For example: "/usr/bin/open" will work, "open" will
-                          not.
+  --messagedismissaction <messagedismissaction>
+                          The action to perform when the user clicks the X button to explicitly dismiss the notification. See --messageaction for format details.
 
-  --rebrand <rebrand>     Requires root privileges and that the calling process
-                          needs either Full Disk Access (10.15+) or at a
-                          minimum App Management (macOS 13+) permissions, as
-                          well as the notifying applications being given
-                          permission to post to Notification Center. Any of
-                          these permissions can be granted manually, but
-                          ideally via PPPCP's delivered via an MDM.
 
-                          If successful and someone is logged in, Notification
-                          Center is restarted.
+OPTIONS:
+  --type <type>           The notification style to post. Must be either:
 
-  --remove <remove>       "prior" or "all". If passing "prior", the full
-                          message will be required too. Including all passed
-                          flags.
+                          • alert  - Persistent notification that remains until the user dismisses or interacts with it.
+                          • banner - Temporary notification that auto-dismisses after a short time.
 
-  --sound <sound>         The sound to play when notification is delivered.
-                          Pass "default" for the default macOS sound, else the
-                          name of a sound in /Library/Sounds or
-                          /System/Library/Sounds.
+                          The user's Notification Center settings for this application may override the requested style.
 
-                          If the sound cannot be found, macOS will use the
-                          "default" sound.
+  --message <message>     The main body text of the notification.
 
-  --subtitle <subtitle>   The notifications subtitle.
+  --messagebutton <messagebutton>
+                          Adds an action button to the notification with the given label. Pass --messagebuttonaction to run a command when the button is clicked.
 
-  --title <title>         The notifications title.
+  --messagebutton2 <messagebutton2>
+                          Adds a second action button to the notification with the given label. Requires --messagebutton to also be passed. Pass --messagebutton2action to run a command when this button is clicked.
 
-  --verbose               Enables logging of actions. Check console for
-                          'Notifier' messages.
+  --rebrand <rebrand>     Path to a PNG or ICNS image to use as the notification icon, replacing the default app icon.
+
+                          Requires root privileges. The calling process must have either Full Disk Access (macOS 10.15+) or App Management (macOS 13+) permission, and the notifying applications must be permitted to post to Notification
+                          Center. These permissions can be granted manually or via PPPC profiles delivered by an MDM.
+
+                          If successful and a user is logged in, Notification Center is restarted to apply the change.
+
+  --remove <remove>       Removes previously delivered notifications. Pass either:
+
+                          • prior - Removes the notification matching the current --type, --message, and any other passed flags. All flags used when originally posting the notification must be passed again.
+                          • all   - Removes all notifications delivered by this application.
+
+  --sound <sound>         The sound to play when the notification is delivered. Pass "default" for the standard macOS notification sound, or the name of a sound file in /Library/Sounds or /System/Library/Sounds (without the file
+                          extension).
+
+                          If the named sound cannot be found, macOS will fall back to the default sound.
+
+  --subtitle <subtitle>   Secondary line of text displayed below the title in the notification.
+
+  --title <title>         The bold title line displayed at the top of the notification. Defaults to the application name if not passed.
+
+  --verbose               Enables detailed progress logging via NSLog. View output in Console.app by filtering for 'Notifier'.
 
   --help                  Show help information.
-
 ```
 
 ## Examples
@@ -102,7 +107,7 @@ As you can see, some of the behaviour and appearence is OS dependent.
 
 macOS 10.15.7 - Light Mode |  macOS 14.3 - Dark mode
 :-------------------------:|:-------------------------:
-<img src="https://github.com/dataJAR/Notifier/assets/2464974/20af5bb9-1e6e-4158-bbc4-67dbd003d7f8" width="317" height="100">  |  <img src="https://github.com/dataJAR/Notifier/assets/2464974/bf8a477c-3ebc-4c54-b4ef-eaa6df8dc052" width="317" height="100">
+<img src="https://github.com/Jamf-Concepts/Notifier/assets/2464974/20af5bb9-1e6e-4158-bbc4-67dbd003d7f8" width="317" height="100">  |  <img src="https://github.com/Jamf-Concepts/Notifier/assets/2464974/bf8a477c-3ebc-4c54-b4ef-eaa6df8dc052" width="317" height="100">
 
 ```
 /Applications/Utilities/Notifier.app/Contents/MacOS/Notifier --type banner --message "message"
@@ -111,7 +116,7 @@ macOS 10.15.7 - Light Mode |  macOS 14.3 - Dark mode
 **Example 2** This example shows a basic alert notification.
 macOS 10.15.7 - Light Mode |  macOS 14.3 - Dark mode
 :-------------------------:|:-------------------------:
-<img src="https://github.com/dataJAR/Notifier/assets/2464974/1bca78ef-8865-4762-902b-081ac39b9c80" width="317" height="100">  |   <img src="https://github.com/dataJAR/Notifier/assets/2464974/e3f6e325-d7d0-49e8-8bfc-34c19025d472" width="317" height="100">
+<img src="https://github.com/Jamf-Concepts/Notifier/assets/2464974/1bca78ef-8865-4762-902b-081ac39b9c80" width="317" height="100">  |   <img src="https://github.com/Jamf-Concepts/Notifier/assets/2464974/e3f6e325-d7d0-49e8-8bfc-34c19025d472" width="317" height="100">
 
 ```
 /Applications/Utilities/Notifier.app/Contents/MacOS/Notifier --type alert --message "message" --messagebutton "Logout" --messagebuttonaction "Logout"
@@ -120,7 +125,7 @@ macOS 10.15.7 - Light Mode |  macOS 14.3 - Dark mode
 **Example 3** This example shows both alert & banner notifications, (sleep used for the example gif, not needed in use but below for completeness sake).
 macOS 10.15.7 - Light Mode |  macOS 14.3 - Dark mode
 :-------------------------:|:-------------------------:
-<img src="https://github.com/dataJAR/Notifier/assets/2464974/8741ccea-f481-46a0-8f15-b97acde2e0c1" width="317" height="154">  |  <img src="https://github.com/dataJAR/Notifier/assets/2464974/dd1f1775-3392-4d24-84b2-dd55aca6d02d" width="317" height="154">
+<img src="https://github.com/Jamf-Concepts/Notifier/assets/2464974/8741ccea-f481-46a0-8f15-b97acde2e0c1" width="317" height="154">  |  <img src="https://github.com/Jamf-Concepts/Notifier/assets/2464974/dd1f1775-3392-4d24-84b2-dd55aca6d02d" width="317" height="154">
 
 ```
 /Applications/Utilities/Notifier.app/Contents/MacOS/Notifier --type alert --message "Please Logout" --messagebutton "Logout"  --messagebuttonaction "logout" --title "Logout";
@@ -131,7 +136,7 @@ macOS 10.15.7 - Light Mode |  macOS 14.3 - Dark mode
 **Example 4** This example shows selective remove of a delivered notificaition via `--remove prior`. Where applicable this would also remove notifications from within Notification Center itself.
 macOS 10.15.7 - Light Mode |  macOS 14.3 - Dark mode
 :-------------------------:|:-------------------------:
-<img src="https://github.com/dataJAR/Notifier/assets/2464974/854440ab-ee52-443b-8d65-ebcad501f194" width="317" height="154">  |  <img src="https://github.com/dataJAR/Notifier/assets/2464974/a0e04d63-0e9f-474d-ba8e-1fa97bdf18be" width="317" height="154">
+<img src="https://github.com/Jamf-Concepts/Notifier/assets/2464974/854440ab-ee52-443b-8d65-ebcad501f194" width="317" height="154">  |  <img src="https://github.com/Jamf-Concepts/Notifier/assets/2464974/a0e04d63-0e9f-474d-ba8e-1fa97bdf18be" width="317" height="154">
 
 ```
 /Applications/Utilities/Notifier.app/Contents/MacOS/Notifier --type alert --message 'Look at me!!';
@@ -144,7 +149,7 @@ macOS 10.15.7 - Light Mode |  macOS 14.3 - Dark mode
 
 macOS 10.15.7 - Light Mode |  macOS 14.3 - Dark mode
 :-------------------------:|:-------------------------:
-<img src="https://github.com/dataJAR/Notifier/assets/2464974/8f4abba7-7866-4e80-8aad-1bc77dcda50c" width="317" height="374">  |  <img src="https://github.com/dataJAR/Notifier/assets/2464974/11902803-3e4e-4ac8-8dda-5c4f0994896e" width="317" height="374">
+<img src="https://github.com/Jamf-Concepts/Notifier/assets/2464974/8f4abba7-7866-4e80-8aad-1bc77dcda50c" width="317" height="374">  |  <img src="https://github.com/Jamf-Concepts/Notifier/assets/2464974/11902803-3e4e-4ac8-8dda-5c4f0994896e" width="317" height="374">
 
 ```
 /Applications/Utilities/Notifier.app/Contents/MacOS/Notifier --type alert --message message;
@@ -160,7 +165,7 @@ macOS 10.15.7 - Light Mode |  macOS 14.3 - Dark mode
 **Example 6** This example shows Notifier 3.0+'s `--rebrand` argument in use, this allows for rebranding of Notifier without having to venture into Xcode etc.
 macOS 10.15.7 - Light Mode |  macOS 14.3 - Dark mode
 :-------------------------:|:-------------------------:
-<img src="https://github.com/dataJAR/Notifier/assets/2464974/ea45ad52-96ec-49a1-8679-4d1461451ea5" width="317" height="154">  |  <img src="https://github.com/dataJAR/Notifier/assets/2464974/49894a04-17e8-4257-9923-e438418a6785" width="317" height="154">
+<img src="https://github.com/Jamf-Concepts/Notifier/assets/2464974/ea45ad52-96ec-49a1-8679-4d1461451ea5" width="317" height="154">  |  <img src="https://github.com/Jamf-Concepts/Notifier/assets/2464974/49894a04-17e8-4257-9923-e438418a6785" width="317" height="154">
 
 ```
 /Applications/Utilities/Notifier.app/Contents/MacOS/Notifier --type alert --message "message";
@@ -181,7 +186,7 @@ macOS 10.15.7 - Light Mode |  macOS 14.3 - Dark mode
 
 ## PPPC
 It's recommended that the below profile is recommended to be deployed before Notfier itself, to UAMDM devices.
-(https://github.com/dataJAR/Notifier/blob/master/profile/Allow%20Notifier%20Notifications.mobileconfig)
+(https://github.com/Jamf-Concepts/Notifier/blob/master/profile/Allow%20Notifier%20Notifications.mobileconfig)
 
 This will allow Notifier to post Notifications without prompting the user to allow.
 
@@ -191,15 +196,15 @@ minimum App Management/SystemPolicyAppBundles (macOS 13+) permissions, as well a
 Any of these permissions can be granted manually, but ideally via PPPCP's delivered via an MDM.
 
 ## PKG
-PKG's will be supplied for every release, & can be found in the [releases](https://github.com/dataJAR/Notifier/releases) section.
+PKG's will be supplied for every release, & can be found in the [releases](https://github.com/Jamf-Concepts/Notifier/releases) section.
 
 ## Flow
 
 The below is the advised deployment flow for Notifier.
 
 1. If rebranding - deploy a PPPC for your management tool of choice, granting either Full Disk Access/SystemPolicyAllFiles (10.15+) or App Management/SystemPolicyAppBundles (macOS 13+).
-2. Deploy the [Notications PpPC](https://github.com/dataJAR/Notifier/blob/master/profile/Allow%20Notifier%20Notifications.mobileconfig) to UAMDM devices
-3. Deploy the latest [Notifier PKG](https://github.com/dataJAR/Notifier/releases)
+2. Deploy the [Notications PpPC](https://github.com/Jamf-Concepts/Notifier/blob/master/profile/Allow%20Notifier%20Notifications.mobileconfig) to UAMDM devices
+3. Deploy the latest [Notifier PKG](https://github.com/Jamf-Concepts/Notifier/releases)
 4. If rebranding - deploy the image to use when rebranding.
 5. if rebranding - deploy a script or payload free package etc which rebrands Notifier via your management tool. This needs to be down with admin/root privileges.
 
@@ -229,7 +234,7 @@ The below _should_ reset Notifications Center, but please test & submit a PR wit
 
 **Q1:** Why start at version 2?
 
-**A1:** At dataJAR, we already had a v1 "Notifier" app deployed.
+**A1:** When dataJAR created this, they already had a v1 "Notifier" app deployed.
 ##
 **Q2:** How can you post both banner & alert notifications?
 
@@ -270,6 +275,14 @@ The below _should_ reset Notifications Center, but please test & submit a PR wit
 **Q10** Why are notifcations all of a sudden showing a prohibted sign across the icon?
 
 **A10** This is a [macOS issue](https://macmule.com/2021/10/28/notifications-showing-a-prohibitory-symbol-after-upgrading-macos-monterey/) that has goes back some years, to resolve either restart Notification Center or the Mac.
+##
+**Q11** Why does rebranding no longer work on macOS 26.4?
+
+**A11** This seems to have been an Apple change. Feedback has been filed, but no response as of yet. Once there is a reponse we can look to amend this appropriately.
+##
+**Q12:** Why the jump to version 4?
+
+**A1:** With version 4, Notifier's bundle id's, notarisation and signing changed to Jamf. This needs new profiles being deployed etc, so a major version bump seemed reasonable.
 
 # Alternatives
 The below projects can be used instead of Notifier & were very much instrumental in Notifiers creation
