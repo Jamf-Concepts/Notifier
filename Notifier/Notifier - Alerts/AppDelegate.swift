@@ -56,7 +56,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
                 switch settings.authorizationStatus {
                     // Already authorized - skip requesting and proceed directly.
                 case .authorized, .provisional, .ephemeral:
-                    // No action needed, authorization already granted.
+                    // If sound was requested but soundSetting is not enabled...
+                    if messageContent.messageSound != nil, settings.soundSetting != .enabled {
+                        // Log a warning..
+                        postToNSLogAndStdOut(logLevel: "WARNING",
+                                             logMessage: "Sound is disabled for this application in System Settings > Notifications. Sound will not play.",
+                                             functionName: #function.components(separatedBy: "(")[0],
+                                             verboseMode: rootElements.verboseMode ?? "")
+                    }
                     break
                     // Not determined or denied - request or report authorization.
                 default:
