@@ -118,6 +118,7 @@ func registerApplications(parsedResult: ArgParser) {
     // Create the JSON to pass to the notifying app.
     let commandJSON = createJSON(messageContent: messageContent, parsedResult: parsedResult,
                                  rootElements: rootElements)
+    // For each notifying app...
     for notifierPath in [GlobalVariables.alertAppPath + "/Contents/MacOS/Notifier - Alerts",
                          GlobalVariables.bannerAppPath + "/Contents/MacOS/Notifier - Notifications"] {
         // Pass commandJSON to the relevant app, exiting afterwards.
