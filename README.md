@@ -278,7 +278,7 @@ The below _should_ reset Notifications Center, but please test & submit a PR wit
 ##
 **Q11** Why does rebranding no longer work on macOS 26.4?
 
-**A11** This seems to have been an Apple change. Feedback has been filed, but no response as of yet. Once there is a reponse we can look to amend this appropriately.
+**A11** This seems to have been an [Apple change](https://macmule.com/2026/10/19/application-icon-changes-via-nsworkspace-seticon-no-longer-being-reflected-in-notification-center-in-macos-26-4/). Feedback has been filed, but no response as of yet. Once there is a reponse we can look to amend this appropriately.
 ##
 **Q12:** Why the jump to version 4?
 
