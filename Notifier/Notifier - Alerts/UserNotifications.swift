@@ -6,7 +6,6 @@
 //
 
 // Imports.
-import AppKit
 import UserNotifications
 
 /// Builds a `userInfo`-compatible action dictionary from the first element of a ``MessageContent/TaskObject`` array.
@@ -101,21 +100,8 @@ func getNotificationSound(messageContent: MessageContent, rootElements: RootElem
     var tempSound = UNNotificationSound.default
     // If we're not using macOS's default sound...
     if messageContent.messageSound?.lowercased() != "default" {
-        let soundName = messageContent.messageSound ?? ""
-        // UNNotificationSound(named:) only searches the app bundle and container, not system sound
-        // directories. Use NSSound to verify the sound exists on the system before using it; if not
-        // found, fall back to the default sound so something is always played.
-        if NSSound(named: soundName) != nil {
-            // Set the notifications sound.
-            tempSound = UNNotificationSound(named: UNNotificationSoundName(rawValue: soundName))
-        // If we cannot find the requested sound...
-        } else {
-            // Log a warning and fall back to the default sound.
-            postToNSLogAndStdOut(logLevel: "WARNING",
-                                 logMessage: "Sound '\(soundName)' not found on this system, falling back to default sound.",
-                                 functionName: #function.components(separatedBy: "(")[0],
-                                 verboseMode: rootElements.verboseMode ?? "")
-        }
+        // Set the notifications sound.
+        tempSound = UNNotificationSound(named: UNNotificationSoundName(rawValue: messageContent.messageSound ?? ""))
     }
     // If verbose mode is enabled...
     if rootElements.verboseMode != nil {
