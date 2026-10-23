@@ -28,7 +28,7 @@ struct NotificationActionOptions: ParsableArguments {
                     \t\t • A single path or URL  - Opened via /usr/bin/open (e.g. https://example.com).
                     \t\t • A binary path + args  - The first argument must be a full path to a binary.
 
-                    \t\t For example: "/usr/bin/open" will work, "open" will not.
+                    \t\t For example: "/usr/bin/defaults" will work, "defaults" will not.
 
                     """
     ))
@@ -50,7 +50,7 @@ struct NotificationActionOptions: ParsableArguments {
     var messagebutton2action: String = ""
     // Action when the notification is dismissed.
     @Option(help: """
-                  The action to perform when the user clicks the X button to explicitly dismiss the notification. \
+                  The action to perform when the user clicks the (X) button to explicitly dismiss the notification. \
                   See --messageaction for format details.
 
                   """)
