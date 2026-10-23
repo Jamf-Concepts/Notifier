@@ -11,12 +11,13 @@ import UserNotifications
 /// Posts an authorisation error and exits when the app is not permitted to post notifications.
 ///
 /// - Parameters:
+///   - logLevel: The log level.
 ///   - statusDescription: A human-readable description of the authorisation status.
 ///   - verboseMode: A non-empty string enables verbose NSLog output.
 ///
-func authorisationNotGranted(statusDescription: String, verboseMode: String) {
+func authorisationNotGranted(logLevel: String, statusDescription: String, verboseMode: String) {
     // Post error to NSLog and std out.
-    postToNSLogAndStdOut(logLevel: "ERROR", logMessage: """
+    postToNSLogAndStdOut(logLevel: logLevel, logMessage: """
                          Authorisation status: \(statusDescription). Either manually approve notifications for this \
                          application or deploy a Notification PPPCP to this Mac, and try posting the notification again.
                          """, functionName: #function.components(separatedBy: "(")[0],
@@ -25,52 +26,44 @@ func authorisationNotGranted(statusDescription: String, verboseMode: String) {
     exit(1)
 }
 
-/// Requests notification authorisation from the system, exiting if it is denied or not granted.
+/// Checks the current notification authorisation status, requesting it if not yet determined.
 ///
-/// Calls ``authorisationNotGranted(statusDescription:verboseMode:)`` with a descriptive status string
-/// if authorisation is not granted or an error occurs.
+/// - If already authorised (`.authorized`, `.provisional`, `.ephemeral`), re-registers the desired
+///   options (alert, sound) so macOS can associate them with the app entry in System Settings.
+///   This is required for MDM-managed settings such as `SoundsEnabled` to appear as managed.
+/// - If `.notDetermined`, calls `requestAuthorization` so macOS registers the app in System Settings
+///   and presents the user prompt. Exits if the request is denied or fails.
+/// - If `.denied`, exits immediately without prompting.
 ///
 /// - Parameters:
 ///   - verboseMode: A non-empty string enables verbose NSLog output.
 ///
-func requestAuthorisation(verboseMode: String) async {
-    // Check the current authorisation status before requesting...
-    let existingSettings = await UNUserNotificationCenter.current().notificationSettings()
-    // If already authorised...
-    if existingSettings.authorizationStatus == .authorized {
-        // Return.
+func checkAuthorisation(verboseMode: String) async {
+    // Retrieve the current notification authorisation status.
+    let settings = await UNUserNotificationCenter.current().notificationSettings()
+    // Switch on the current authorisation status.
+    switch settings.authorizationStatus {
+    // Authorisation is already granted - re-register options so MDM-managed settings are reflected
+    // in System Settings (e.g. SoundsEnabled). This call is a no-op for the user prompt.
+    case .authorized, .provisional, .ephemeral:
+        _ = try? await UNUserNotificationCenter.current()
+            .requestAuthorization(options: [.alert, .sound])
         return
-    }
-    // Attempt to request authorisation, catching any system-level errors.
-    do {
-        // Request authorization, capturing the result as a variable.
-        let granted = try await UNUserNotificationCenter.current()
-            .requestAuthorization(options: [.alert, .providesAppNotificationSettings, .sound])
-        // If authorisation was not granted...
-        if !granted {
-            // Check whether authorisation is denied or not yet determined.
-            let settings = await UNUserNotificationCenter.current().notificationSettings()
-            // Declare a human-readable description of the authorisation status.
-            let statusDescription: String
-            // Switch on the status to produce a descriptive string.
-            switch settings.authorizationStatus {
-            // Authorisation was explicitly denied by the user.
-            case .denied:
-                statusDescription = "denied"
-            // Authorisation has not been approved yet.
-            case .notDetermined:
-                statusDescription = "not approved"
-            // Any other status that does not permit notifications.
-            default:
-                statusDescription = "not granted (status: \(settings.authorizationStatus.rawValue))"
-            }
-            // Post authorisation error.
-            authorisationNotGranted(statusDescription: statusDescription, verboseMode: verboseMode)
+    // Authorisation was explicitly denied - exit without prompting.
+    case .denied:
+        authorisationNotGranted(logLevel: "ERROR", statusDescription: "denied", verboseMode: verboseMode)
+    // Authorisation has not been requested yet - fire a non-blocking request to register the app in System Settings.
+    default:
+        // Submit the authorisation request without waiting for the user's response, so this invocation
+        // is not blocked by the system prompt. macOS will show the prompt and register the app in
+        // System Settings; the next invocation will see .authorized and proceed normally.
+        Task.detached {
+            _ = try? await UNUserNotificationCenter.current()
+                .requestAuthorization(options: [.alert, .sound])
         }
-    // If the authorisation request threw an unexpected system-level error...
-    } catch {
-        // Post authorisation error with the underlying error description.
-        authorisationNotGranted(statusDescription: "not determined: (\(error.localizedDescription))",
+        // Exit with a message directing the user to approve in System Settings.
+        authorisationNotGranted(logLevel: "WARNING",
+                        statusDescription: "not yet approved - approve notifications in System Settings and try again",
                                 verboseMode: verboseMode)
     }
 }

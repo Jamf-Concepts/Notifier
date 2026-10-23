@@ -256,10 +256,10 @@ func processMessageButton(notificationCenter: UNUserNotificationCenter, messageC
     return ([:], [:], tempCategory)
 }
 
-/// Schedules the notification request with Notification Center and confirms delivery.
+/// Schedules the notification request with Notification Center and returns on success.
 ///
 /// Uses `passedBase64` as the notification identifier so it can be removed later.
-/// Exits with code `0` on successful delivery or `1` on scheduling error.
+/// Exits with code `1` on scheduling error, returning to the caller on successful delivery.
 ///
 /// - Parameters:
 ///   - notificationCenter: The `UNUserNotificationCenter` instance to post to.
@@ -269,7 +269,7 @@ func processMessageButton(notificationCenter: UNUserNotificationCenter, messageC
 ///   - rootElements: Used to check verbose mode and pass the `verboseMode` string to inner calls.
 ///
 func postNotification(notificationCenter: UNUserNotificationCenter, notificationContent: UNMutableNotificationContent,
-                      messageContent: MessageContent, passedBase64: String, rootElements: RootElements) {
+                      messageContent: MessageContent, passedBase64: String, rootElements: RootElements) async {
     // If we're in verbose mode...
     if rootElements.verboseMode != nil {
         // Progress log.
@@ -281,28 +281,25 @@ func postNotification(notificationCenter: UNUserNotificationCenter, notification
     // Create the request object.
     let notificationRequest = UNNotificationRequest(identifier: passedBase64, content: notificationContent,
                                                     trigger: nil)
-    // Post the notification, using the completion handler to catch any scheduling errors.
-    notificationCenter.add(notificationRequest) { error in
-        // If the notification failed to schedule...
-        if let error = error {
-            // Post error.
-            postToNSLogAndStdOut(logLevel: "ERROR",
-                                 logMessage: "Failed to post notification: \(error.localizedDescription)",
-                                 functionName: #function.components(separatedBy: "(")[0],
-                                 verboseMode: rootElements.verboseMode ?? "")
-            // Exit.
-            exit(1)
-        }
-        // If we're in verbose mode...
-        if rootElements.verboseMode != nil {
-            // Progress log.
-            NSLog("\(#function.components(separatedBy: "(")[0]) - notification scheduled")
-        }
-        // Sleep, so we don't exit before the notification has been delivered.
-        sleep(1)
+    // Post the notification, handling any scheduling errors.
+    do {
+        try await notificationCenter.add(notificationRequest)
+    } catch {
+        // Post error.
+        postToNSLogAndStdOut(logLevel: "ERROR",
+                             logMessage: "Failed to post notification: \(error.localizedDescription)",
+                             functionName: #function.components(separatedBy: "(")[0],
+                             verboseMode: rootElements.verboseMode ?? "")
         // Exit.
-        exit(0)
+        exit(1)
     }
+    // If we're in verbose mode...
+    if rootElements.verboseMode != nil {
+        // Progress log.
+        NSLog("\(#function.components(separatedBy: "(")[0]) - notification scheduled")
+    }
+    // Sleep, so we don't exit before macOS has delivered the notification.
+    sleep(1)
 }
 
 /// Removes the specific prior posted notification matching `passedBase64` and exits.

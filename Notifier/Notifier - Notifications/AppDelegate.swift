@@ -49,32 +49,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             // Set delegate before any notification center interactions.
             notificationCenter.delegate = self
             // Check auth status then process arguments sequentially in async context.
-            let workTask = Task {
-                // Retrieve the current notification authorization settings.
-                let settings = await notificationCenter.notificationSettings()
-                // Switch on the current authorization status.
-                switch settings.authorizationStatus {
-                    // Already authorized - skip requesting and proceed directly.
-                case .authorized, .provisional, .ephemeral:
-                    // No action needed, authorization already granted.
-                    break
-                    // Not determined or denied - request or report authorization.
-                default:
-                    // Request authorisation - exits internally if denied or on error.
-                    await requestAuthorisation(verboseMode: rootElements.verboseMode ?? "")
-                }
-                // Process the arguments as needed.
-                processArguments(messageContent: messageContent, notificationCenter: notificationCenter,
-                                 passedBase64: passedBase64, rootElements: rootElements)
-            }
-            // Watchdog task - cancels work and exits if it exceeds 5 seconds.
             Task {
-                // Wait 5 seconds before intervening.
-                try? await Task.sleep(nanoseconds: 5_000_000_000)
-                // Cancel the work task if it is still running.
-                workTask.cancel()
-                // If we timeout, then the status is: "not approved"...
-                authorisationNotGranted(statusDescription: "not approved", verboseMode: rootElements.verboseMode ?? "")
+                // Check authorisation - exits with an error if not approved.
+                await checkAuthorisation(verboseMode: rootElements.verboseMode ?? "")
+                // Process the arguments as needed.
+                await processArguments(messageContent: messageContent, notificationCenter: notificationCenter,
+                                       passedBase64: passedBase64, rootElements: rootElements)
+                // Exit.
+                exit(0)
             }
         }
     }
@@ -92,7 +74,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
 ///   - rootElements: The decoded root-level notification metadata.
 ///
 func processArguments(messageContent: MessageContent, notificationCenter: UNUserNotificationCenter,
-                      passedBase64: String, rootElements: RootElements) {
+                      passedBase64: String, rootElements: RootElements) async {
     // Create a notification content object.
     let notificationContent = UNMutableNotificationContent()
     // Add category identifier to notificationContent required anyway so setting here.
@@ -163,7 +145,7 @@ func processArguments(messageContent: MessageContent, notificationCenter: UNUser
             notificationContent.title = getNotificationTitle(messageContent: messageContent, rootElements: rootElements)
         }
         // Post the notification.
-        postNotification(notificationCenter: notificationCenter, notificationContent: notificationContent,
-                         messageContent: messageContent, passedBase64: passedBase64, rootElements: rootElements)
+        await postNotification(notificationCenter: notificationCenter, notificationContent: notificationContent,
+                               messageContent: messageContent, passedBase64: passedBase64, rootElements: rootElements)
     }
 }
