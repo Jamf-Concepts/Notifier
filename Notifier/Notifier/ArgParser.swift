@@ -15,20 +15,24 @@ struct NotificationActionOptions: ParsableArguments {
     @Option(help: ArgumentHelp(
         "The action to perform when the notification body is clicked.",
         discussion: """
-                    \t\t Each action option applies to a different interaction point on the notification:
+                    \t\t  Each action option applies to a different interaction point on the notification:
 
-                    \t\t • --messageaction        - Fires when the notification body itself is clicked.
-                    \t\t • --messagebuttonaction  - Requires --messagebutton. Fires when --messagebutton is clicked.
-                    \t\t • --messagebutton2action - Requires --messagebutton2. Fires when --messagebutton2 is clicked.
-                    \t\t • --dismissaction        - Fires when the user clicks the (X) to dismiss the notification.
+                    \t\t  • --messageaction        - The action to be performed when the notification body is \
+                    clicked.
+                    \t\t  • --messagebuttonaction  - Requires --messagebutton. The action to be performed when \
+                    --messagebutton is clicked.
+                    \t\t  • --messagebutton2action - Requires --messagebutton2. The action to be performed when \
+                    --messagebutton2 is clicked.
+                    \t\t  • --dismissaction        - The action to be performed when the user clicks the (X) to \
+                    dismiss the notification.
 
-                    \t\t The following values can be passed to any action option:
+                    \t\t  The following values can be passed to any action option:
 
-                    \t\t • 'logout'              - Prompts the logged-in user to log out.
-                    \t\t • A single path or URL  - Opened via /usr/bin/open (e.g. https://example.com).
-                    \t\t • A binary path + args  - The first argument must be a full path to a binary.
+                    \t\t  • 'logout'              - Prompts the logged-in user to log out.
+                    \t\t  • A single path or URL  - Opened via /usr/bin/open (e.g. https://example.com).
+                    \t\t  • A binary path + args  - The first argument must be a full path to a binary.
 
-                    \t\t For example: "/usr/bin/defaults" will work, "defaults" will not.
+                    \t\t  For example: "/usr/bin/defaults" will work, "defaults" will not.
 
                     """
     ))
