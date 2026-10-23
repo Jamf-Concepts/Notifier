@@ -137,8 +137,8 @@ func resolveNotificationAction(for actionIdentifier: String) -> (userInfoKey: St
         return ("messageAction", "message - clicked")
     // The notification was dismissed without interaction.
     case "com.apple.UNNotificationDismissActionIdentifier":
-        // Return the messageDismissAction key and its log message.
-        return ("messageDismissAction", "message - dismissed")
+        // Return the dismissAction key and its log message.
+        return ("dismissAction", "message - dismissed")
     // The first message button was clicked.
     case "messagebutton":
         // Return the messageButtonAction key and its log message.

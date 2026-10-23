@@ -181,11 +181,11 @@ func buildMessageContent(parsedResult: ArgParser) -> MessageContent {
         messageContent.messageAction = parseAction(actionString: parsedResult.actionOptions.messageaction,
                                                     parsedResult: parsedResult)
     }
-    // If we've been passed a messagedismissaction...
-    if parsedResult.actionOptions.messagedismissaction != "" {
-        // Set messageDismissAction.
-        messageContent.messageDismissAction = parseAction(actionString: parsedResult.actionOptions.messagedismissaction,
-                                                          parsedResult: parsedResult)
+    // If we've been passed a dismissaction...
+    if parsedResult.actionOptions.dismissaction != "" {
+        // Set dismissAction.
+        messageContent.dismissAction = parseAction(actionString: parsedResult.actionOptions.dismissaction,
+                                                   parsedResult: parsedResult)
     }
     // If we've been passed a sound...
     if parsedResult.sound != "" {

@@ -20,8 +20,7 @@ struct NotificationActionOptions: ParsableArguments {
                     \t\t • --messageaction        - Fires when the notification body itself is clicked.
                     \t\t • --messagebuttonaction  - Requires --messagebutton. Fires when --messagebutton is clicked.
                     \t\t • --messagebutton2action - Requires --messagebutton2. Fires when --messagebutton2 is clicked.
-                    \t\t • --messagedismissaction - Fires when the user clicks the (X) to explicitly dismiss the \
-                    notification.
+                    \t\t • --dismissaction        - Fires when the user clicks the (X) to dismiss the notification.
 
                     \t\t The following values can be passed to any action option:
 
@@ -55,7 +54,7 @@ struct NotificationActionOptions: ParsableArguments {
                   See --messageaction for format details.
 
                   """)
-    var messagedismissaction: String = ""
+    var dismissaction: String = ""
 }
 
 /// Argument parser for the Notifier CLI.
@@ -75,7 +74,7 @@ struct ArgParser: ParsableCommand {
                --type <alert|banner> --message <message> --messagebutton <label> --messagebuttonaction <action>
                --type <alert|banner> --message <message> --messagebutton <label> --messagebutton2 <label> \
                --messagebutton2action <action>
-               --type <alert|banner> --message <message> --messagedismissaction <action>
+               --type <alert|banner> --message <message> --dismissaction <action>
                --type <alert|banner> --remove prior --message <message> [options]
                --type <alert|banner> --remove all
                --rebrand <path to image>

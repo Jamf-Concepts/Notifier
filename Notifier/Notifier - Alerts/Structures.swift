@@ -20,7 +20,7 @@ struct MessageContent: Codable {
     // Optional - alert only - action to perform when the second message button is clicked.
     var messageButton2Action: [TaskObject]?
     // Optional - alert only - action to perform when the notification is dismissed.
-    var messageDismissAction: [TaskObject]?
+    var dismissAction: [TaskObject]?
     // Optional - the sound played when the notification has been delivered.
     var messageSound: String?
     // Optional - the notifications subtitle.
@@ -37,7 +37,7 @@ struct MessageContent: Codable {
     // Initialize MessageContent.
     init(messageAction: [TaskObject]? = nil, messageBody: String? = nil, messageButton: String? = nil,
          messageButton2: String? = nil, messageButton2Action: [TaskObject]? = nil,
-         messageButtonAction: [TaskObject]? = nil, messageDismissAction: [TaskObject]? = nil,
+         messageButtonAction: [TaskObject]? = nil, dismissAction: [TaskObject]? = nil,
          messageSound: String? = nil, messageSubtitle: String? = nil, messageTitle: String? = nil) {
         self.messageAction = messageAction
         self.messageBody = messageBody
@@ -48,7 +48,7 @@ struct MessageContent: Codable {
         self.messageButton2Action = messageButton2Action
         self.messageButtonAction = messageButtonAction
         // Assign the dismiss action.
-        self.messageDismissAction = messageDismissAction
+        self.dismissAction = dismissAction
         self.messageSound = messageSound
         self.messageSubtitle = messageSubtitle
         self.messageTitle = messageTitle

@@ -124,11 +124,11 @@ func processArguments(messageContent: MessageContent, notificationCenter: UNUser
             notificationContent.userInfo["messageAction"] = getNotificationBodyAction(messageContent: messageContent,
                                                                                       rootElements: rootElements)
         }
-        // If we have a value for messageDismissAction passed...
-        if messageContent.messageDismissAction != nil {
+        // If we have a value for dismissAction passed...
+        if messageContent.dismissAction != nil {
             // Build the dismiss action dictionary and add to userInfo.
-            notificationContent.userInfo["messageDismissAction"] = buildButtonActionDict(
-                taskObjects: messageContent.messageDismissAction!, verboseLabel: "messageDismissAction",
+            notificationContent.userInfo["dismissAction"] = buildButtonActionDict(
+                taskObjects: messageContent.dismissAction!, verboseLabel: "dismissAction",
                 rootElements: rootElements)
         }
         // messageButton needs defining, even when not called. So processing it here along with messageButtonAction.
