@@ -300,18 +300,8 @@ func postNotification(notificationCenter: UNUserNotificationCenter, notification
         }
         // Sleep, so we don't exit before the notification has been delivered.
         sleep(1)
-        // Check with Notification Center what was delivered.
-        notificationCenter.getDeliveredNotifications { notifications in
-            // Find the notification we posted by its identifier.
-            if notifications.first(where: { $0.request.identifier == passedBase64 }) != nil {
-                // Post progress.
-                postToNSLogAndStdOut(logLevel: "INFO", logMessage: "notification delivered successfully!",
-                                     functionName: #function.components(separatedBy: "(")[0],
-                                     verboseMode: rootElements.verboseMode ?? "")
-            }
-            // Exit.
-            exit(0)
-        }
+        // Exit.
+        exit(0)
     }
 }
 
@@ -332,10 +322,11 @@ func removePriorNotification(notificationCenter: UNUserNotificationCenter, messa
     }
     // Remove any prior notifications with the same identifier as ncContentbase64.
     notificationCenter.removeDeliveredNotifications(withIdentifiers: [passedBase64])
-    // Post success...
-    postToNSLogAndStdOut(logLevel: "INFO", logMessage: "removed requested prior delivered banner notification!",
-                         functionName: #function.components(separatedBy: "(")[0],
-                         verboseMode: rootElements.verboseMode ?? "")
+    // If we're in verbose mode...
+    if rootElements.verboseMode != nil {
+        // Progress log
+        NSLog("\(#function.components(separatedBy: "(")[0]) - removed prior delivered banner notification.")
+    }
     // Sleep, so we don't exit before notification(s) have been removed.
     sleep(1)
     // Exit.
@@ -358,10 +349,11 @@ func removeAllPriorNotifications(notificationCenter: UNUserNotificationCenter, m
     }
     // Remove all delivered notifications.
     notificationCenter.removeAllDeliveredNotifications()
-    // Post success...
-    postToNSLogAndStdOut(logLevel: "INFO", logMessage: "removed all prior delivered banner notifications!",
-                         functionName: #function.components(separatedBy: "(")[0],
-                         verboseMode: rootElements.verboseMode ?? "")
+    // If we're in verbose mode...
+    if rootElements.verboseMode != nil {
+        // Progress log
+        NSLog("\(#function.components(separatedBy: "(")[0]) - removed all prior delivered banner notifications.")
+    }
     // Sleep, so we don't exit before notification(s) have been removed.
     sleep(1)
     // Exit.

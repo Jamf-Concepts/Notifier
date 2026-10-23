@@ -87,31 +87,26 @@ struct ArgParser: ParsableCommand {
     )
     // Required - notification type.
     @Option(help: """
-                  The notification style to post. Must be either:
-
-                  • alert  - Persistent notification that remains until the user dismisses or interacts with it.
-                  • banner - Temporary notification that auto-dismisses after a short time.
-
-                  The user's Notification Center settings for this application may override the requested style.
+                  alert or banner - REQUIRED.
 
                   """)
     var type: String = ""
     // The notification's message body.
     @Option(help: """
-                  The main body text of the notification.
+                  The notifications message.
 
                   """)
     var message: String = ""
     // Optional first action button label.
     @Option(help: """
-                  Adds an action button to the notification with the given label. \
+                  Adds a button to the notification with the given label. \
                   Pass --messagebuttonaction to run a command when the button is clicked.
 
                   """)
     var messagebutton: String = ""
     // Optional second action button label (requires --messagebutton).
     @Option(help: """
-                  Adds a second action button to the notification with the given label. \
+                  Adds a second button to the notification with the given label. \
                   Requires --messagebutton to also be passed. \
                   Pass --messagebutton2action to run a command when this button is clicked.
 
