@@ -34,11 +34,18 @@ func authorisationNotGranted(statusDescription: String, verboseMode: String) {
 ///   - verboseMode: A non-empty string enables verbose NSLog output.
 ///
 func requestAuthorisation(verboseMode: String) async {
+    // Check the current authorisation status before requesting...
+    let existingSettings = await UNUserNotificationCenter.current().notificationSettings()
+    // If already authorised...
+    if existingSettings.authorizationStatus == .authorized {
+        // Return.
+        return
+    }
     // Attempt to request authorisation, catching any system-level errors.
     do {
         // Request authorization, capturing the result as a variable.
         let granted = try await UNUserNotificationCenter.current()
-            .requestAuthorization(options: [.alert, .sound])
+            .requestAuthorization(options: [.alert, .providesAppNotificationSettings, .sound])
         // If authorisation was not granted...
         if !granted {
             // Check whether authorisation is denied or not yet determined.
@@ -60,9 +67,10 @@ func requestAuthorisation(verboseMode: String) async {
             // Post authorisation error.
             authorisationNotGranted(statusDescription: statusDescription, verboseMode: verboseMode)
         }
-    // If the authorisation request itself threw an error...
+    // If the authorisation request threw an unexpected system-level error...
     } catch {
-        // If we get here, then the status is: "not approved"...
-        authorisationNotGranted(statusDescription: "not approved", verboseMode: verboseMode)
+        // Post authorisation error with the underlying error description.
+        authorisationNotGranted(statusDescription: "not determined: (\(error.localizedDescription))",
+                                verboseMode: verboseMode)
     }
 }
