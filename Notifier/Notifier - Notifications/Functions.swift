@@ -169,6 +169,29 @@ func postToNSLogAndStdOut(logLevel: String, logMessage: String, functionName: St
     }
 }
 
+/// Resolves runtime placeholders in a task path and its arguments.
+///
+/// Supported placeholders:
+///   - `{loggedInUser}` — replaced with the name of the currently logged-in user at action execution time.
+///
+/// - Parameters:
+///   - taskPath: The path to the executable, which may contain placeholders.
+///   - taskArguments: The arguments array, each element of which may contain placeholders.
+///
+/// - Returns:
+///   A tuple of the resolved task path and resolved arguments array.
+///
+func resolveActionPlaceholders(taskPath: String, taskArguments: [String]) -> (String, [String]) {
+    // Get the logged-in user's name.
+    let loggedInUser = NSUserName()
+    // Replace {loggedInUser} in the task path.
+    let resolvedPath = taskPath.replacingOccurrences(of: "{loggedInUser}", with: loggedInUser)
+    // Replace {loggedInUser} in each argument.
+    let resolvedArguments = taskArguments.map { $0.replacingOccurrences(of: "{loggedInUser}", with: loggedInUser) }
+    // Return the resolved path and arguments.
+    return (resolvedPath, resolvedArguments)
+}
+
 /// Runs a subprocess at the given path with the given arguments and returns its output and exit status.
 ///
 /// - Parameters:

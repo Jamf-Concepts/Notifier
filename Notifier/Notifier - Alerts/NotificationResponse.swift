@@ -90,10 +90,13 @@ func processNotificationActions(userInfoKey: String, userInfo: [AnyHashable: Any
                 // Progress log.
                 NSLog("\(#function.components(separatedBy: "(")[0]) - \(userInfoKey) - \(userInfo[userInfoKey] ?? [])")
             }
+            // Resolve runtime placeholders in the task path and arguments.
+            let (resolvedPath, resolvedArguments) = resolveActionPlaceholders(
+                taskPath: messageActionDict["taskPath"] as? String ?? "",
+                taskArguments: messageActionDict["taskArguments"] as? [String] ?? [])
             // Run the task, returning boolean.
-            let (taskOutput, taskStatus) = runTask(taskPath: messageActionDict["taskPath"] as? String ?? "",
-                                                   taskArguments: messageActionDict["taskArguments"]
-                                                   as? [String] ?? [], userInfo: userInfo)
+            let (taskOutput, taskStatus) = runTask(taskPath: resolvedPath,
+                                                   taskArguments: resolvedArguments, userInfo: userInfo)
             // If verbose mode is set...
             if userInfo["verboseMode"] != nil {
                 // If the task completed successfully...
