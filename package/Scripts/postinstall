@@ -1,0 +1,33 @@
+#!/bin/bash
+#
+##########################################################################################
+#
+# In accessing and using this Product, you confirm that you accept the terms of our
+# Product Licence in full and agree to comply with the terms of such Licence.
+#
+# https://resources.jamf.com/documents/products/documentation/software-license-and-services-agreement.pdf
+#
+##########################################################################################
+#
+# DESCRIPTION
+# Postinstall script for Jamf Notifier
+#
+##########################################################################################
+
+# Var declarations
+correct_path='/Applications/Utilities/Notifier.app'
+subfolder_dir='/Applications/Utilities/Notifier.localized/'
+subfolder_path="${subfolder_dir}"'Notifier.app'
+
+# If we don't have a Notifier.app at: `correct_path`, but we do one at: `subfolder_path`...
+if [ ! -d "${correct_path}" ] && [ -d "${subfolder_path}" ]
+then
+    # Log.
+    /bin/echo "Moving: ${subfolder_path} to ${correct_path}..."
+    # Move `subfolder_path` to `correct_path`...
+    /bin/mv "${subfolder_path}" "${correct_path}"
+    # Log.
+    /bin/echo "Deleting: ${subfolder_dir}..."
+    # Delete `subfolder_dir`...
+    /bin/rm -rf "${subfolder_dir}"
+fi

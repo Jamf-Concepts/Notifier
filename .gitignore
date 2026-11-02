@@ -93,3 +93,7 @@ iOSInjectionProject/
 *.pkg
 package/ROOT/Applications/Utilities/*
 package/notifier-app.plist
+/.vscode
+sonar-project.properties
+/Notifier/.claude
+/package/Applications/Utilities/Notifier.app
