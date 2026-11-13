@@ -210,6 +210,19 @@ func runTask(taskPath: String, taskArguments: [String], userInfo: [AnyHashable: 
         // Progress log.
         NSLog("\(#function.components(separatedBy: "(")[0]) - taskPath: \(taskPath), taskArguments: \(taskArguments)")
     }
+    // Guard against non-existent or non-file paths before touching Process.
+    var isDirectory: ObjCBool = false
+    guard FileManager.default.fileExists(atPath: taskPath, isDirectory: &isDirectory),
+          !isDirectory.boolValue else {
+        // If verbose mode is enabled...
+        if userInfo["verboseMode"] != nil {
+            // Post error.
+            postToNSLogAndStdOut(logLevel: "ERROR", logMessage: "Not a valid executable: \(taskPath)",
+                                 functionName: #function.components(separatedBy: "(")[0], verboseMode: "enabled")
+        }
+        // Return early - path is not a valid executable.
+        return ("Not a valid executable: \(taskPath)", false)
+    }
     // Create Task.
     let task = Process()
     // Set task to call the binary.
