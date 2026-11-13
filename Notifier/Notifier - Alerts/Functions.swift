@@ -192,7 +192,9 @@ func resolveActionPlaceholders(taskPath: String, taskArguments: [String]) -> (St
     return (resolvedPath, resolvedArguments)
 }
 
-/// Runs a subprocess at the given path with the given arguments and returns its output and exit status.
+/// Launches a subprocess at the given path with the given arguments and returns immediately.
+///
+/// Fire-and-forget: the process runs independently and is adopted by launchd when the helper exits.
 ///
 /// - Parameters:
 ///   - taskPath: The path to the executable.
@@ -200,11 +202,9 @@ func resolveActionPlaceholders(taskPath: String, taskArguments: [String]) -> (St
 ///   - userInfo: The notification's `userInfo` dictionary, used to check verbose mode.
 ///
 /// - Returns:
-///   A tuple of the captured stdout/stderr output string and `true` if the task exited with status 0.
+///   A tuple of an error description and `false` if the task failed to launch, or `("", true)` on success.
 ///
 func runTask(taskPath: String, taskArguments: [String], userInfo: [AnyHashable: Any]) -> (String, Bool) {
-    // Var declaration.
-    var successfulExit =  false
     // If verbose mode is enabled...
     if userInfo["verboseMode"] != nil {
         // Progress log.
@@ -216,29 +216,19 @@ func runTask(taskPath: String, taskArguments: [String], userInfo: [AnyHashable: 
     task.executableURL = URL(fileURLWithPath: taskPath)
     // Set task arguments.
     task.arguments = taskArguments
-    // Create pipe.
-    let outPipe = Pipe()
-    // Set pipe to be used for stdout.
-    task.standardOutput = outPipe
-    // Set pipe to be used for stderr.
-    task.standardError = outPipe
-    // Run the task.
-    try? task.run()
-    // Wait until task exits.
-    task.waitUntilExit()
-    // Get output.
-    let outdata = outPipe.fileHandleForReading.readDataToEndOfFile()
-    // Convert to string.
-    let cmdOut = String(decoding: outdata, as: UTF8.self)
-    // Return boolean.
-    if task.terminationStatus == 0 {
-        // Return true.
-        successfulExit = true
-    // If tasks exits with anything other than 0...
-    } else {
-        // Return false.
-        successfulExit =  false
+    // Launch the task.
+    do {
+        try task.run()
+    } catch {
+        // If verbose mode is enabled...
+        if userInfo["verboseMode"] != nil {
+            // Post error.
+            postToNSLogAndStdOut(logLevel: "ERROR", logMessage: "Failed to launch: \(taskPath), error: \(error.localizedDescription)",
+                                 functionName: #function.components(separatedBy: "(")[0], verboseMode: "enabled")
+        }
+        // Return early - task failed to launch.
+        return (error.localizedDescription, false)
     }
-    // Return cmdOut text and if the task exited successfully or not.
-    return (cmdOut, successfulExit)
+    // Return success - task launched, running independently.
+    return ("", true)
 }
