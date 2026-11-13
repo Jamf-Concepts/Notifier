@@ -121,7 +121,7 @@ func loggedInUser() -> String {
 
 /// Parses an action string into an argv-compatible ``MessageContent/TaskObject`` array.
 ///
-/// Handles quoted arguments with spaces, single-item paths (opened via `/usr/bin/open`),
+/// Handles single-quoted arguments with spaces, single-item paths (opened via `/usr/bin/open`),
 /// the special `logout` keyword, and multi-argument commands where the first element is a binary path.
 ///
 /// - Parameters:
@@ -143,7 +143,7 @@ func parseAction(actionString: String, parsedResult: ArgParser) -> [MessageConte
         NSLog("\(#function.components(separatedBy: "(")[0]) - actionString: \(actionString)")
     }
     // The regex pattern we're to use.
-    let regexPattern = try? NSRegularExpression(pattern: "'(.*?)'|\"(.*?)\"")
+    let regexPattern = try? NSRegularExpression(pattern: "'(.*?)'")
     // Apply pattern to actionText, returning matches.
     let regexMatches = regexPattern?.matches(in: actionString, options: [],
                                             range: NSRange(location: 0, length: actionString.utf16.count))
