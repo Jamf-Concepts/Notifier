@@ -34,8 +34,9 @@ struct NotificationActionOptions: ParsableArguments {
 
                     \t\t  For example: "/usr/bin/defaults" will work, "defaults" will not.
 
-                    \t\t  To include arguments or paths that contain spaces, wrap them in single quotes \
+                    \t\t  To include paths or arguments that contain spaces, wrap them in single quotes \
                     within the action string. For example:
+                    \t\t    --messageaction "'/Applications/My App.app'"
                     \t\t    --messageaction "/usr/bin/say 'Hello World'"
 
                     """
